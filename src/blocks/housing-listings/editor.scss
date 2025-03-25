@@ -1,0 +1,31 @@
+.hrdc-housing-listings {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .hrdc-housing-listings .listing-box {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 20px;
+    width: 300px;
+    background-color: #fff;
+    border-radius: 40px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-family: inherit;
+  }
+  
+  .hrdc-housing-listings .listing-title {
+    font-size: 24px;
+    font-weight: bold;
+    font-style: normal;
+    color: #333333;
+    text-align: left;
+    padding-bottom: 10px;
+  }
+  
+  .hrdc-housing-listings .listing-info,
+  .hrdc-housing-listings .listing-link {
+    text-align: left;
+  }
+  

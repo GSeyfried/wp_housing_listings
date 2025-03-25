@@ -1,0 +1,50 @@
+{
+	"apiVersion": 2,
+	"name": "hrdc-tools/housing-listings",
+	"title": "Housing Listings",
+	"category": "hrdc-tools",
+	"icon": "grid-view",
+	"description": "Displays housing listings from JSON data in a responsive grid.",
+	"attributes": {
+		"containerClass": { "type": "string", "default": "" },
+		"containerStyle": { "type": "string", "default": "" },
+		"showExtraMeta": { "type": "boolean", "default": false },
+
+		"cardInnerPadding": { "type": "number", "default": 20 },
+		"cardOuterPadding": { "type": "number", "default": 20 },
+		"cardBorder": { "type": "string", "default": "2px solid #ccc" },
+		"cardTitleColor": { "type": "string", "default": "#333333" },
+		"cardTitleTextAlign": { "type": "string", "default": "left" },
+		"cardBackground": { "type": "string", "default": "#fff" },
+		"cardRadius": { "type": "number", "default": 40 },
+		"cardShadow": { "type": "string", "default": "0 2px 4px rgba(0,0,0,0.1)" },
+		"cardWidth": { "type": "number", "default": 300 },
+
+		"cardTitleFontSize": { "type": "number", "default": 24 },
+		"cardTitleFontWeight": { "type": "string", "default": "bold" },
+		"cardTitleFontStyle": { "type": "string", "default": "normal" },
+		"cardTitlePadding": { "type": "number", "default": 10 },
+
+
+		"cardColumns": { "type": "number", "default": 2 },
+		"cardFontFamily": { "type": "string", "default": "inherit" },
+		"cardTextAlign": { "type": "string", "default": "left" },
+		"cardFontSize": { "type": "number", "default": 16 },
+		"cardValueFontWeight": { "type": "string", "default": "normal" },
+		"cardValueFontStyle": { "type": "string", "default": "normal" },
+		"cardLabelFontWeight": { "type": "string", "default": "bold" },
+		"cardLabelFontStyle": { "type": "string", "default": "italic" },
+		"align": { "type": "string", "default": "none"}
+	},
+	"supports": {
+		"html": true,
+		"align": ["wide", "full"]
+	},
+	"textdomain": "hrdc-custom-tools",
+	"editorScript": "file:./edit.js",
+	"script": "file:./index.js",
+	"editorStyle": "file:./editor.css",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+  }
+  

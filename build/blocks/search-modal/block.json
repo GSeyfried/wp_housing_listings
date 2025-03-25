@@ -1,0 +1,31 @@
+{
+  "apiVersion": 2,
+  "name": "hrdc-tools/search-modal",
+  "title": "Search Modal",
+  "category": "hrdc-tools",
+  "icon": "filter",
+  "description": "Provides a modal pop-up for filtering housing listings. Use this block to trigger search criteria events.",
+  "attributes": {
+    "buttonText": {
+      "type": "string",
+      "default": "Filter Listings"
+    },
+    "containerClass": {
+      "type": "string",
+      "default": ""
+    },
+    "containerStyle": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "textdomain": "hrdc-tools",
+  "editorScript": "file:./index.js",
+  "script": "file:./edit.js",
+  "editorStyle": "file:./editor.css",
+  "style": "file:./style.css",
+  "render": "file:./render.php"
+}
