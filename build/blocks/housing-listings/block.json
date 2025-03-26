@@ -111,12 +111,14 @@
     "html": true,
     "align": [
       "wide",
-      "full"
+      "full",
+      "left",
+      "center",
+      "right"
     ]
   },
   "textdomain": "hrdc-custom-tools",
-  "editorScript": "file:./edit.js",
-  "script": "file:./index.js",
+  "editorScript": "file:./index.js",
   "editorStyle": "file:./editor.css",
   "style": "file:./style.css",
   "render": "file:./render.php"

@@ -1,1 +1,0 @@
-(()=>{"use strict";window.wp.element,window.wp.components,window.wp.i18n,window.ReactJSXRuntime})();

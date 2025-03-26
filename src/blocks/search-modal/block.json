@@ -6,25 +6,31 @@
 	"icon": "filter",
 	"description": "Provides a modal pop-up for filtering housing listings. Use this block to trigger search criteria events.",
 	"attributes": {
-	  "buttonText": {
-		"type": "string",
-		"default": "Filter Listings"
-	  },
-	  "containerClass": {
-		"type": "string",
-		"default": ""
-	  },
-	  "containerStyle": {
-		"type": "string",
-		"default": ""
-	  }
-	},
+    "buttonText": { "type": "string", "default": "Search by Criteria" },
+    "buttonColor": { "type": "string", "default": "#0073aa" },
+    "buttonTextSize": { "type": "number", "default": 16 },
+    "buttonFont": { "type": "string", "default": "inherit" },
+    "buttonAlignment": { "type": "string", "default": "left" },
+    "buttonRadius": { "type": "number", "default": 4 },
+    "buttonBorderColor": { "type": "string", "default": "#ccc" },
+
+    "labelText": { "type": "string", "default": "Label:" },
+    "labelFont": { "type": "string", "default": "inherit" },
+    "labelFontWeight": { "type": "string", "default": "normal" },
+    "labelTextSize": { "type": "number", "default": 14 },
+
+    "showMetaFields": { "type": "boolean", "default": true },
+
+    "containerClass": { "type": "string", "default": "" },
+    "containerStyle": { "type": "string", "default": "" },
+    "align": { "type": "string", "default": "none" }
+  },
 	"supports": {
-	  "html": false
+	  "html": false,
+	"align": ["wide", "full", "left", "center", "right"]
 	},
 	"textdomain": "hrdc-tools",
 	"editorScript": "file:./index.js",
-	"script": "file:./edit.js",
 	"editorStyle": "file:./editor.css",
 	"style": "file:./style.css",
 	"render": "file:./render.php"
