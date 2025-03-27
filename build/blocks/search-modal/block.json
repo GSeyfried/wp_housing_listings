@@ -16,7 +16,7 @@
     },
     "buttonTextSize": {
       "type": "number",
-      "default": 16
+      "default": 14
     },
     "buttonFont": {
       "type": "string",
@@ -26,17 +26,53 @@
       "type": "string",
       "default": "left"
     },
-    "buttonRadius": {
-      "type": "number",
-      "default": 4
-    },
-    "buttonBorderColor": {
+    "borderColor": {
       "type": "string",
       "default": "#ccc"
     },
-    "labelText": {
+    "borderRadius": {
+      "type": "number",
+      "default": 4
+    },
+    "backgroundColor": {
       "type": "string",
-      "default": "Label:"
+      "default": "#fff"
+    },
+    "showFields": {
+      "type": "boolean",
+      "default": true
+    },
+    "city": {
+      "type": "string",
+      "default": ""
+    },
+    "reservedFor": {
+      "type": "string",
+      "default": ""
+    },
+    "felonies": {
+      "type": "string",
+      "default": "no"
+    },
+    "creditCheck": {
+      "type": "string",
+      "default": "no"
+    },
+    "unitTypes": {
+      "type": "array",
+      "default": []
+    },
+    "petsAllowed": {
+      "type": "string",
+      "default": "no"
+    },
+    "socialSecurity": {
+      "type": "string",
+      "default": "no"
+    },
+    "category": {
+      "type": "string",
+      "default": ""
     },
     "labelFont": {
       "type": "string",
@@ -50,7 +86,35 @@
       "type": "number",
       "default": 14
     },
-    "showMetaFields": {
+    "cityShow": {
+      "type": "boolean",
+      "default": true
+    },
+    "demographicShow": {
+      "type": "boolean",
+      "default": true
+    },
+    "feloniesShow": {
+      "type": "boolean",
+      "default": true
+    },
+    "creditShow": {
+      "type": "boolean",
+      "default": true
+    },
+    "unitTypesShow": {
+      "type": "boolean",
+      "default": true
+    },
+    "petsShow": {
+      "type": "boolean",
+      "default": true
+    },
+    "socialSecurityShow": {
+      "type": "boolean",
+      "default": true
+    },
+    "categoryShow": {
       "type": "boolean",
       "default": true
     },
@@ -79,6 +143,7 @@
   },
   "textdomain": "hrdc-tools",
   "editorScript": "file:./index.js",
+  "viewScript": "file:./view.js",
   "editorStyle": "file:./editor.css",
   "style": "file:./style.css",
   "render": "file:./render.php"

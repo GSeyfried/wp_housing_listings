@@ -42,6 +42,7 @@
 	},
 	"textdomain": "hrdc-custom-tools",
 	"editorScript": "file:./index.js",
+	"viewScript": "file:./view.js",
 	"editorStyle": "file:./editor.css",
 	"style": "file:./style.css",
 	"render": "file:./render.php"
