@@ -8,8 +8,67 @@ import {
 	RangeControl,
 	Button
 } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+
+
+const L = ( () => {
+    const es = {
+        any: 'Cualquiera',
+        city: 'Ciudad',
+        demo: 'Población objetivo',
+        felonyQ: '¿Tiene antecedentes penales?',
+        creditQ: '¿Tiene buen crédito (600+)?',
+        units: 'Tipos de unidad',
+        petsQ: '¿Necesita unidades que acepten mascotas (no animales de servicio)?',
+        ssnQ: '¿Tiene número de seguro social?',
+        housingType: 'Tipos de vivienda',
+        senior55: 'Adultos mayores (55+)',
+        senior62: 'Adultos mayores (62+)',
+        disabled: 'Persona con discapacidad',
+        noneAbove: 'Ninguno de los anteriores',
+        studio: 'Estudio',
+        oneBed: '1 habitación',
+        twoBed: '2 habitaciones',
+        threeBed: '3 habitaciones',
+        fourBed: '4 o más habitaciones',
+        yes: 'Sí',
+        no: 'No',
+        lowIncome: 'Crédito fiscal para vivienda de bajos ingresos',
+        subsidized: 'Viviendas subsidiadas',
+        market: 'Precio de mercado',
+        modalTitle: 'Filtrar anuncios',
+        btnOpen: 'Filtrar viviendas',
+        btnApply: 'Aplicar filtros',
+        btnReset: 'Restablecer filtros',
+    };
+
+    const isEs = window.hrdcBlockAttr?.isSpanish;   // ← same flag you send from PHP
+    return key => ( isEs ? es[key] : undefined ) || {
+        any:'Any', city:'City', demo:'Demographic',
+        felonyQ:'Do you have a felony conviction?',
+        creditQ:'Do you have good credit (above 600+)?',
+        units:'Unit Types',
+        petsQ:'Are you looking for pet friendly units (for non‑service animals)?',
+        ssnQ:'Do you have a social security number?',
+        housingType:'Housing Types',
+        senior55:'Senior (55+)',
+        senior62:'Senior (62+)',
+        disabled:'Person with Disabling Condition',
+        noneAbove:'None of the above',
+        studio:'Studio', oneBed:'1 bedroom', twoBed:'2 bedrooms',
+        threeBed:'3 bedrooms', fourBed:'4+ bedrooms',
+        yes:'Yes', no:'No',
+        lowIncome:'Low Income Tax Credit',
+        subsidized:'Subsidized Housing',
+        market:'Market Rate',
+        modalTitle:'Filter Listings',
+        btnOpen:'Search by Criteria',
+        btnApply:'Apply Filters',
+        btnReset:'Reset Filters',
+    }[key];
+})();
+
 
 export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 	// Attributes coming from block.json
@@ -25,7 +84,7 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 		buttonFont = 'inherit',
 		buttonTextSize = 14,
 		buttonFontWeight = 'normal',
-		ButtonSize = 48,
+		buttonSize = 48,
 		//Label settings
 		labelFont = 'inherit',
 		labelTextSize = 14,
@@ -73,8 +132,8 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 				<PanelBody title={ __( 'Button Settings', 'hrdc-custom-tools' ) } initialOpen={ true }>
 					<RangeControl
 						label={ __( 'Button Size (px)', 'hrdc-custom-tools' ) }
-						value={ attributes.ButtonSize || 14 }
-						onChange={ ( val ) => setAttributes({ButtonSize: val }) }
+						value={ attributes.buttonSize || 14 }
+						onChange={ ( val ) => setAttributes({buttonSize: val }) }
 						min={ 10 }
 						max={ 600 }
 					/>
@@ -211,8 +270,8 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 						border: `1px solid ${ borderColor }`,
 						borderRadius: `${ borderRadius }px`,
 						padding: '10px',
-						height: `${ ButtonSize }px`,
-						width:`${ ButtonSize * 3 }px`,
+						height: `${ buttonSize }px`,
+						width:`${ buttonSize * 3 }px`,
 						fontSize: `${ buttonTextSize }px`,
 						fontFamily: buttonFont,
 						fontWeight: buttonFontWeight
@@ -228,13 +287,13 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 						{ attributes.cityShow && (
 					<div className="modal-field">
 						<label htmlFor="hrdc-city" style={ {fontFamily: labelFont, fontSize: labelTextSize, fontWeight:labelFontWeight} }>
-							{ __( 'City', 'hrdc-custom-tools' ) }
+							{ L('city') }
 						</label>
 						<SelectControl
 							id="hrdc-city"
 							value={ filters.city }
 							options={[
-								{ label: __( 'Any', 'hrdc-custom-tools' ), value: '' },
+								{ label: L('any'), value: '' },
 								{ label: 'Bozeman', value: 'bozeman' },
 								{ label: 'Belgrade', value: 'belgrade' },
 								{ label: 'West Yellowstone', value: 'west yellowstone' },
@@ -249,16 +308,16 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 					{attributes.demographicShow && (
 					<div className="modal-field">
 						<label htmlFor="hrdc-demographic" style={  {fontFamily: labelFont, fontSize: labelTextSize, fontWeight:labelFontWeight} }>
-							{ __( 'Demographic', 'hrdc-custom-tools' ) }
+							{ L('demo') }
 						</label>
 						<SelectControl
 							id="hrdc-demographic"
 							value={ filters.reservedFor }
 							options={[
-								{ label: __( 'None of the above', 'hrdc-custom-tools' ), value: '' },
-								{ label: 'Senior (55+)', value: 'senior (55+)' },
-								{ label: 'Senior (62+)', value: 'senior (62+)' },
-								{ label: 'Person with Disabling Condition', value: 'person with disabling condition' },
+								{ label: L('noneAbove'), value: '' },
+								{ label: L('senior55'), value: 'senior (55+)' },
+								{ label: L('senior62'), value: 'senior (62+)' },
+								{ label: L('disabled'), value: 'person with disabling condition' },
 							]}
 							onChange={ ( value ) => setFilters({ ...filters, reservedFor: value }) }
 						/>
@@ -267,14 +326,14 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 					{attributes.feloniesShow && (
 						<div className="modal-field">
 							<label htmlFor="hrdc-felonies" style={  {fontFamily: labelFont, fontSize: labelTextSize, fontWeight:labelFontWeight} }>
-								{ __( 'Do you have a felony conviction?', 'hrdc-custom-tools' ) }
+								{ L('felonyQ') }
 							</label>
 							<SelectControl
 								id="hrdc-felonies"
 								value={ filters.felonies }
 								options={[
-									{ label: __( 'No', 'hrdc-custom-tools' ), value: 'no' },
-									{ label: __( 'Yes', 'hrdc-custom-tools' ), value: 'yes' },
+									{ label: L('no'), value: 'no' },
+									{ label: L('yes'), value: 'yes' },
 								]}
 								onChange={ ( value ) => setFilters({ ...filters, felonies: value }) }
 							/>
@@ -283,14 +342,14 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 					{attributes.creditCheckShow && (
 					<div className="modal-field">
 							<label htmlFor="hrdc-credit" style={  {fontFamily: labelFont, fontSize: labelTextSize, fontWeight:labelFontWeight} }>
-								{ __( 'Do you have good credit (above 600+)?', 'hrdc-custom-tools' ) }
+								{L('creditQ')}
 							</label>
 							<SelectControl
 								id="hrdc-credit"
 								value={ filters.creditCheck }
 								options={[
-									{ label: __( 'No', 'hrdc-custom-tools' ), value: 'no' },
-									{ label: __( 'Yes', 'hrdc-custom-tools' ), value: 'yes' },
+									{ label: L('no'), value: 'no' },
+									{ label: L('yes'), value: 'yes' },
 								]}
 								onChange={ ( value ) => setFilters({ ...filters, creditCheck: value }) }
 							/>
@@ -299,18 +358,18 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 					{attributes.unitTypesShow && (
 						<div className="modal-field">
 							<label htmlFor="hrdc-unit-types" style={  {fontFamily: labelFont, fontSize: labelTextSize, fontWeight:labelFontWeight}}>
-								{ __( 'Unit Types', 'hrdc-custom-tools' ) }
+								{L('units')}
 							</label>
 							<SelectControl
 								id="hrdc-unit-types"
 								value={ filters.unitTypes }
 								options ={[
-									{ label: __( 'Any', 'hrdc-custom-tools' ), value: '' },
-									{ label: 'Studio', value: 'studio' },
-									{ label: '1 Bedroom', value: '1 bedroom' },
-									{ label: '2 Bedrooms', value: '2 bedrooms' },
-									{ label: '3 Bedrooms', value: '3 bedrooms' },
-									{ label: '4 Bedrooms', value: '4 bedrooms' },
+									{ label: L('any'), value: '' },
+									{ label: L('studio'), value: 'studio' },
+									{ label: L('oneBed'), value: '1 bedroom' },
+									{ label: L('twoBed'), value: '2 bedrooms' },
+									{ label: L('threeBed'), value: '3 bedrooms' },
+									{ label: L('fourBed'), value: '4 bedrooms' },
 								]}
 								onChange={ ( val ) => setFilters({ ...filters, unitTypes: val }) }
 							/>
@@ -319,14 +378,14 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 					{attributes.petsShow && (
 						<div className="modal-field">
 							<label htmlFor="hrdc-pets" style={  {fontFamily: labelFont, fontSize: labelTextSize, fontWeight:labelFontWeight} }>
-								{ __( 'Are you looking for pet friendly units (for non‑service animals)?', 'hrdc-custom-tools' ) }
+								{L('petsQ')}
 							</label>
 							<SelectControl
 								id="hrdc-pets"
 								value={ filters.pets }
 								options={[
-									{ label: __( 'No', 'hrdc-custom-tools' ), value: 'no' },
-									{ label: __( 'Yes', 'hrdc-custom-tools' ), value: 'yes' },
+									{ label: L('no'), value: 'no' },
+									{ label: L('yes'), value: 'yes' },
 								]}
 								onChange={ ( value ) => setFilters({ ...filters, pets: value }) }
 							/>
@@ -335,14 +394,14 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 					{attributes.socialSecurityShow && (
 						<div className="modal-field">
 							<label htmlFor="hrdc-social" style={  {fontFamily: labelFont, fontSize: labelTextSize, fontWeight:labelFontWeight} }>
-								{ __( 'Do you have a social security number?', 'hrdc-custom-tools' ) }
+								{L('ssnQ')}
 							</label>
 							<SelectControl
 								id="hrdc-social"
 								value={ filters.socialSecurity }
 								options={[
-									{ label: __( 'No', 'hrdc-custom-tools' ), value: 'no' },
-									{ label: __( 'Yes', 'hrdc-custom-tools' ), value: 'yes' },
+									{ label: L('no'), value: 'no' },
+									{ label: L('yes'), value: 'yes' },
 								]}
 								onChange={ ( value ) => setFilters({ ...filters, socialSecurity: value }) }
 							/>
@@ -351,16 +410,16 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 					{attributes.categoryShow && (
 						<div className="modal-field">
 							<label htmlFor="hrdc-housing-types" style={  {fontFamily: labelFont, fontSize: labelTextSize, fontWeight:labelFontWeight} }>
-								{ __( 'Housing Types', 'hrdc-custom-tools' ) }
+								{L('housingType')}
 							</label>
 							<SelectControl
 								id="hrdc-housing-types"
 								value={ filters.category }
 								options={[
-									{ label: __( 'Any', 'hrdc-custom-tools' ), value: '' },
-									{ label: 'Low Income Tax Credit', value: 'low income tax credit' },
-									{ label: 'Subsidized Housing', value: 'subsidized housing' },
-									{ label: 'Market Rate', value: 'market rate' }
+									{ label: L('any'), value: '' },
+									{ label: L('lowIncome'), value: 'low income tax credit' },
+									{ label: L('subsidized'), value: 'subsidized housing' },
+									{ label: L('market'), value: 'market rate' }
 								]}
 								onChange={ ( value ) => setFilters({ ...filters, category: value }) }
 							/>
@@ -369,10 +428,10 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 				
 					<div style={ { marginTop: '20px' } }>
 						<Button isPrimary onClick={ () => console.log( filters ) } style={ { marginRight: '10px' } }>
-							{ __( 'Apply Filters', 'hrdc-custom-tools' ) }
+							{ L('btnApply') }
 						</Button>
 						<Button onClick={ () => console.log( 'Reset Filters' ) }>
-							{ __( 'Reset Filters', 'hrdc-custom-tools' ) }
+							{ L('btnReset') }
 						</Button>
 					</div>
 				</div>

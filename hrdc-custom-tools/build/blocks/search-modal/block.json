@@ -14,10 +14,6 @@
       "type": "string",
       "default": "#0073aa"
     },
-    "buttonSize": {
-      "type": "number",
-      "default": 48
-    },
     "buttonTextSize": {
       "type": "number",
       "default": 14

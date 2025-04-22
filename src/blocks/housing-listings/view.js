@@ -118,6 +118,7 @@ function advancedFilterListings(listings, filters) {
 		const socialSecMatch    = !filters.socialSecurity || filters.socialSecurity.toLowerCase() === ''|| (normalizeYesNo(filters.socialSecurity) === false ? socialSec === 'no' : true);
 		const categoryMatch     = !filters.category || filters.category.toLowerCase() === ''|| funCategoryMatch(filters.category, category);
 
+		/*
         console.log("City:", city, "Filter:", filters.city, "Match:", cityMatch);
         console.log("Reserved For:", reservedFor, "Filter:", filters.reservedFor, "Match:", reservedForMatch);
         console.log("Application Fee:", appFee, "Match:", appFeeMatch);
@@ -127,19 +128,39 @@ function advancedFilterListings(listings, filters) {
         console.log("Pets Allowed:", petsAllowed, "Filter:", filters.pets, "Match:", petsAllowedMatch);
         console.log("Social Security:", socialSec, "Filter:", filters.socialSecurity, "Match:", socialSecMatch);
         console.log("Category:", category, "Filter:", filters.category, "Match:", categoryMatch);
-
+		*/
 
 		return cityMatch && reservedForMatch && appFeeMatch && feloniesMatch && creditCheckMatch &&
 			   unitTypesMatch && petsAllowedMatch && socialSecMatch && categoryMatch;
 	});
 }
+const a = window.hrdcBlockAttr || {};
+
+function getFontStyles() {
+    return {
+        title: `font-size:${a.cardTitleFontSize}px;color:${a.cardTitleColor};text-align:${a.cardTitleTextAlign};font-weight:${a.cardTitleFontWeight};font-style:${a.cardTitleFontStyle};padding-bottom:${a.cardTitlePadding}px;`,
+        info : `font-family:${a.cardFontFamily};text-align:${a.cardTextAlign};font-weight:${a.cardValueFontWeight};font-style:${a.cardValueFontStyle};`,
+        label: `font-weight:${a.cardLabelFontWeight};font-style:${a.cardLabelFontStyle};`
+    };
+}
+const style = getFontStyles();
+
 
 function updateListings(filteredListings) {
     const container = document.getElementById('hl-results');
     if (!container) return;
+	const style = getFontStyles();   // title / info / label
+	const lbl   = a.isSpanish
+		? { address:'Dirección', manager:'Gerente', phone:'Teléfono',
+			website:'Sitio web', category:'Categoría', desc:'Descripción',
+			noneWeb:'No sitio web', nonePhone:'No número de teléfono' }
+		: { address:'Address',   manager:'Manager', phone:'Phone',
+			website:'Website',   category:'Category', desc:'Description',
+			noneWeb:'No website', nonePhone:'No phone number' };
 
     // Rebuild the container's content.
     let html = '';
+	
 
     if (filteredListings.length > 0) {
         filteredListings.forEach(post => {
@@ -147,27 +168,34 @@ function updateListings(filteredListings) {
             html += `<div class="listing-box">
                         <div class="listing-row">
                             <div class="listing-left">
-                                <div class="listing-title">${ post.title }</div>
-                                <div class="listing-info">
-                                    <em>Address:</em> ${ meta._address }, ${ meta._city }
+                                <div class="listing-title" style="${style.title}">${ post.title }</div>
+                                <div class="listing-info" style="${style.info}">
+                                     <em style="${style.label}">${lbl.address}:</em>
+									${ meta._address || 'N/A' }${ meta._city ? ', ' + meta._city : '' }
                                 </div>
-                                <div class="listing-info">
-                                    <em>Manager:</em> ${ meta._property_manager }
+                                <div class="listing-info" style="${style.info}">
+                                    <em style="${style.label}">${lbl.manager}:</em>
+									${ meta._property_manager || 'N/A' }
                                 </div>
-                                <div class="listing-info">
-                                    <em>Phone:</em> ${ meta._phone }
+                                <div class="listing-info" style="${style.info}">
+                                    <em style="${style.label}">${lbl.phone}:</em>
+									${ meta._phone ? meta._phone : lbl.nonePhone }
                                 </div>
-                                <div class="listing-info">
-                                    <em>Website:</em> <a href="${ meta._website }" target="_blank">${ meta._website || 'N/A' }</a>
+                                <div class="listing-info" style="${style.info}">
+                                    <em style="${style.label}">${lbl.website}:</em>
+									${ meta._website
+										? `<a href="${meta._website}" target="_blank">${meta._website}</a>`
+										: lbl.noneWeb }
                                 </div>
-                                <div class="listing-info">
-                                    <em>Category:</em> ${ meta._category }
+                                <div class="listing-info" style="${style.info}">
+                                    <em style="${style.label}">${lbl.category}:</em>
+									${ meta._category || 'N/A' }
                                 </div>
                             </div>
                             <div class="listing-right">
-                                <div class="listing-info">
-                                    <em>Description:</em><br>
-                                    <span>${ post.content }</span>
+                                <div class="listing-info" style="${style.info}">
+                                    <em style="${style.label}">${lbl.desc}:</em><br>
+									<span style="${style.info}">${ post.content }</span>
                                 </div>
                             </div>
                         </div>

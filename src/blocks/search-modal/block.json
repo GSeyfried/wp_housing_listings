@@ -8,6 +8,7 @@
 	"attributes": {
 		"buttonText": { "type": "string", "default": "Search by Criteria" },
 		"buttonColor": { "type": "string", "default": "#0073aa" },
+		"buttonSize": {"type":"number", "default": 48},
 		"buttonTextSize": { "type": "number", "default": 14 },
 		"buttonFont": { "type": "string", "default": "inherit" },
 		"buttonAlignment": { "type": "string", "default": "left" },

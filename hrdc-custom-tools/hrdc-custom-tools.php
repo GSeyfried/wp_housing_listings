@@ -133,7 +133,6 @@ function hrdc_register_meta() {
         '_pets_allowed'           => 'string', // For filtering
         '_social_security_required' => 'string', //For filtering
         '_universal_application'  => 'string', // For filtering
-        '_description_es'         => 'string',
     ];
 
     foreach ($meta_fields as $key => $type) {
@@ -237,7 +236,7 @@ function hrdc_register_rest_routes() {
     register_rest_route('hrdc-custom-tools/v1', '/refresh-nonce', array(
         'methods' => 'GET',
         'callback' => 'hrdc_refresh_nonce',
-        'permission_callback' => function () { return is_user_logged_in(); },
+        'permission_callback' => '__return_true'
     ));
 }
 
@@ -418,11 +417,9 @@ function hrdc_parse_housing_listings( $json_file ) {
             update_post_meta( $post_id, '_felonies_considered', sanitize_text_field( $listing["Felonies Considered"] ?? '' ) );
             update_post_meta( $post_id, '_credit_check_not_required', sanitize_text_field( $listing["Credit check not required"] ?? '' ) );
             update_post_meta( $post_id, '_unit_types', sanitize_text_field( $listing["Unit Types"] ?? '' ) );
-            update_post_meta( $post_id, '_pets_allowed', sanitize_text_field( $listing["Pets allowed"] ?? '' ) );
+            update_post_meta( $post_id, '_pets_allowed', sanitize_text_field( $listing["Pets Allowed"] ?? '' ) );
             update_post_meta( $post_id, '_social_security_required', sanitize_text_field( $listing["Social Security Required"] ?? '' ) );
             update_post_meta( $post_id, '_universal_application', sanitize_text_field( $listing["Universal Application"] ?? '' ) );
-            update_post_meta(
-                $post_id, '_description_es', sanitize_textarea_field( $listing['Descripción (auto)'] ?? '' ) );
 
             // Log a summary of meta values for debugging.
             error_log("Post ID: {$post_id} - Meta: " . print_r(get_post_meta($post_id), true));

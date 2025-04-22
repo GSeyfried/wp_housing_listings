@@ -43,24 +43,26 @@ function hrdc_render_update_data_page() {
     </div>
     <script>
     // Helper function: if a REST call returns 403, refresh the nonce and retry.
-    async function hrdcSendRestRequest(url, options, tried = false) {
-        const res = await fetch(url, options);
-
-        if (res.status === 403 && !tried) {
-            console.warn('Nonce expired → grabbing a fresh one…');
-
-            // 1. fetch the new nonce (no X‑WP‑Nonce needed here)
-            const { nonce } = await fetch(
-            `${hrdcApiSettings.root}hrdc-custom-tools/v1/refresh-nonce`
-            ).then(r => r.json());
-
-            // 2. cache it and retry the original call once
-            hrdcApiSettings.nonce = nonce;
-            options.headers = { ...options.headers, 'X-WP-Nonce': nonce };
-            return hrdcSendRestRequest(url, options, true);  // only one retry
-        }
-
-        return res;  // success or hard failure
+    async function hrdcSendRestRequest(url, options) {
+        return fetch(url, options).then(response => {
+            if (response.status === 403) {
+                console.warn("Nonce expired. Refreshing...");
+                return fetch(`${hrdcApiSettings.root}hrdc-custom-tools/v1/refresh-nonce`, {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-WP-Nonce": hrdcApiSettings.nonce
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    hrdcApiSettings.nonce = data.nonce;
+                    options.headers = Object.assign({}, options.headers, { "X-WP-Nonce": hrdcApiSettings.nonce });
+                    return fetch(url, options);
+                });
+            }
+            return response;
+        });
     }
 
     (function(){
@@ -187,7 +189,6 @@ function hrdc_render_update_data_page() {
                 updateBtn.className = 'button';
                 updateBtn.textContent = 'Update';
                 updateBtn.addEventListener('click', () => {
-                    alert("Updating. Please wait...");
                     const dataType = document.getElementById(`hrdc-file-data-type-${encodeURIComponent(file)}`).value;
                     hrdcSendRestRequest(`${hrdcApiSettings.root}hrdc-custom-tools/v1/update/${encodeURIComponent(file)}`, {
                         method: 'POST',

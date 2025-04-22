@@ -14,31 +14,17 @@ $query = new WP_Query( array(
     'order'          => 'ASC',
 ) );
 
-// Build an array of listings data for use in JavaScript filtering with language support.
-$is_spanish = ( get_locale() === 'es_ES' );   // or after switch_to_locale()
+// Build an array of listings data for use in JavaScript filtering.
 $listings_data = array();
-$lbl = $is_spanish
-    ? [ 'addr'=>'Dirección:', 'man'=>'Gerente:', 'phone'=>'Teléfono:',
-        'web'=>'Sitio web:', 'cat'=>'Categoría:', 'desc'=>'Descripción:' ]
-    : [ 'addr'=>'Address:',   'man'=>'Manager:', 'phone'=>'Phone:',
-        'web'=>'Website:',    'cat'=>'Category:',  'desc'=>'Description:' ];
-
 if ( $query->have_posts() ) {
     while ( $query->have_posts() ) {
         $query->the_post();
         $post_id = get_the_ID();
 
-        //Desciption vs Descripcion
-        $desc_raw = $is_spanish
-            ? get_post_meta( $post_id, '_description_es', true )
-            : apply_filters( 'the_content', get_the_content() );
-        $desc_html = nl2br( wp_kses_post( $desc_raw ) );
-        $desc_json = nl2br( esc_html( $desc_raw ) ); 
-
         $listings_data[] = array(
             'id'         => $post_id,
             'title'      => get_the_title(),
-            'content'    => $desc_json,
+            'content'    => apply_filters( 'the_content', get_the_content() ),
             'meta'       => array(
                 '_address'                => get_post_meta( $post_id, '_address', true ) ?: '',
                 '_city'                   => get_post_meta( $post_id, '_city', true ) ?: '',
@@ -120,42 +106,6 @@ $custom_styles = '<style>
 }
 
 </style>';
-
-/**
- * ------------------------------------------------------------------
- * PASS BLOCK ATTRIBUTES & LOCALE TO view.js
- * ------------------------------------------------------------------
- */
-
-
-// Build the object for JS.
-$js_attr = array(
-	'isSpanish'           => $is_spanish,
-	'cardFontFamily'      => $cardFontFamily,
-	'cardTextAlign'       => $cardTextAlign,
-	'cardValueFontWeight' => $cardValueFontWeight,
-	'cardValueFontStyle'  => $cardValueFontStyle,
-	'cardLabelFontWeight' => $cardLabelFontWeight,
-	'cardLabelFontStyle'  => $cardLabelFontStyle,
-	'cardTitleFontSize'   => $cardTitleFontSize,
-	'cardTitleColor'      => $cardTitleColor,
-	'cardTitleTextAlign'  => $cardTitleTextAlign,
-	'cardTitleFontWeight' => $cardTitleFontWeight,
-	'cardTitleFontStyle'  => $cardTitleFontStyle,
-	'cardTitlePadding'    => $cardTitlePadding,
-);
-
-// Handle auto‑registered from block.json →  namespace/block + "-script".
-// For hrdc-tools/housing-listings it is:
-$handle = 'hrdc-tools-housing-listings-script';
-wp_enqueue_script( $handle );
-
-wp_add_inline_script(
-	$handle,
-	'window.hrdcBlockAttr = ' . wp_json_encode( $js_attr ) . ';',
-	'before'
-);
-
 echo $custom_styles;
 
 echo '<div id="hl-results-count" style="margin-bottom:10px; font-size:16px; color:#333;"></div>';
@@ -194,29 +144,29 @@ echo '<div ' . $wrapper_atts . '>';
                         echo '<div class="listing-title" style="font-size:' . esc_attr( $cardTitleFontSize ) . 'px; color:' . esc_attr( $cardTitleColor ) . '; text-align:' . esc_attr( $cardTitleTextAlign ) . '; font-weight:' . esc_attr( $cardTitleFontWeight ) . '; font-style:' . esc_attr( $cardTitleFontStyle ) . '; padding-bottom:' . esc_attr( $cardTitlePadding ) . 'px;">' . get_the_title() . '</div>';
                         // Address
                         echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . esc_html( $lbl['addr'] ) . '</em> ';
+                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . __( 'Address: ', 'hrdc-custom-tools' ) . '</em> ';
                             echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $address . ', ' . $city . '</span>';
                         echo '</div>';
                         // Manager
                         echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' .esc_html( $lbl['man'] ) . '</em> ';
+                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . __( 'Manager: ', 'hrdc-custom-tools' ) . '</em> ';
                             echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $manager . '</span>';
                         echo '</div>';
                         // Phone
                         echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' .esc_html( $lbl['phone'] ) . '</em> ';
+                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . __( 'Phone: ', 'hrdc-custom-tools' ) . '</em> ';
                             echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $phone . '</span>';
                         echo '</div>';
                         // Website
                         echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . esc_html( $lbl['web'] ) . '</em> ';
+                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . __( 'Website: ', 'hrdc-custom-tools' ) . '</em> ';
                             echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">';
                                 echo '<a href="' . $website_url . '" target="_blank" rel="noreferrer">' . $website_text . '</a>';
                             echo '</span>';
                         echo '</div>';
                         // Category
                         echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' .esc_html( $lbl['cat'] ) . '</em> ';
+                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . __( 'Category: ', 'hrdc-custom-tools' ) . '</em> ';
                             echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $category . '</span>';
                         echo '</div>';
                     echo '</div>'; // end listing-left
@@ -224,8 +174,8 @@ echo '<div ' . $wrapper_atts . '>';
                     echo '<div class="listing-right" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
                         // Description
                         echo '<div class="listing-info">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' .esc_html( $lbl['desc'] )  . '</em><br>';
-                            echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $desc_html . '</span>';
+                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . __( 'Description: ', 'hrdc-custom-tools' ) . '</em><br>';
+                            echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . get_the_content() . '</span>';
                         echo '</div>';
                     echo '</div>'; // end listing-right
                 echo '</div>'; // end listing-row

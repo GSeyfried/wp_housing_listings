@@ -5,6 +5,66 @@
  * @param array $attributes Block attributes.
  * @return string
  */
+$is_spanish = ( get_locale() === 'es_ES' );     // or switch_to_locale(..)
+
+$lbl = $is_spanish ? [
+    'city'       => 'Ciudad',
+    'any'        => 'Cualquiera',
+    'demo'       => 'Población objetivo',
+    'noneAbove'  => 'Ninguno de los anteriores',
+    'sen55'      => 'Adultos mayores (55+)',
+    'sen62'      => 'Adultos mayores (62+)',
+    'disabled'   => 'Persona con discapacidad',
+    'felonyQ'    => '¿Tiene antecedentes penales?',
+    'creditQ'    => '¿Buen crédito (600+)?',
+    'unitTypes'  => 'Tipos de unidad',
+    'studio'     => 'Estudio',
+    '1bed'       => '1 habitación',
+    '2bed'       => '2 habitaciones',
+    '3bed'       => '3 habitaciones',
+    '4bed'       => '4 o más habitaciones',
+    'petsQ'      => '¿Necesita unidades que acepten mascotas?',
+    'ssnQ'       => '¿Tiene número de seguro social?',
+    'housing'    => 'Tipos de vivienda',
+    'lowIncome'  => 'Crédito fiscal‑LIHTC',
+    'subsidized' => 'Viviendas subsidiadas',
+    'market'     => 'Precio de mercado',
+    'yes'        => 'Sí',
+    'no'         => 'No',
+    'modalTitle' => 'Filtrar anuncios',
+    'btnOpen'    => 'Filtrar viviendas',
+    'btnApply'   => 'Aplicar filtros',
+    'btnReset'   => 'Restablecer filtros',
+] : [
+    // English
+    'city'       => 'City',
+    'any'        => 'Any',
+    'demo'       => 'Demographic',
+    'noneAbove'  => 'None of the above',
+    'sen55'      => 'Senior (55+)',
+    'sen62'      => 'Senior (62+)',
+    'disabled'   => 'Person with Disabling Condition',
+    'felonyQ'    => 'Do you have a felony conviction?',
+    'creditQ'    => 'Do you have good credit (above 600+)?',
+    'unitTypes'  => 'Unit Types',
+    'studio'     => 'Studio',
+    '1bed'       => '1 bedroom',
+    '2bed'       => '2 bedrooms',
+    '3bed'       => '3 bedrooms',
+    '4bed'       => '4+ bedrooms',
+    'petsQ'      => 'Are you looking for pet‑friendly units (non‑service animals)?',
+    'ssnQ'       => 'Do you have a social security number?',
+    'housing'    => 'Housing Types',
+    'lowIncome'  => 'Low Income Tax Credit',
+    'subsidized' => 'Subsidized Housing',
+    'market'     => 'Market Rate',
+    'yes'        => 'Yes',
+    'no'         => 'No',
+    'modalTitle' => 'Filter Listings',
+    'btnOpen'    => 'Search by Criteria',
+    'btnApply'   => 'Apply Filters',
+    'btnReset'   => 'Reset Filters',
+];
 
 // Retrieve persistent attributes with fallbacks.
 $container_class    = isset( $attributes['containerClass'] ) ? $attributes['containerClass'] : '';
@@ -15,11 +75,11 @@ $borderRadius       = isset( $attributes['borderRadius'] ) ? $attributes['border
 $backgroundColor    = isset( $attributes['backgroundColor'] ) ? $attributes['backgroundColor'] : '#fff';
 
 // Button settings
-$buttonText         = isset( $attributes['buttonText'] ) ? $attributes['buttonText'] : __( 'Search by Criteria', 'hrdc-custom-tools' );
+$buttonText         = isset( $attributes['buttonText'] ) ? $attributes['buttonText'] : $lbl['btnOpen'];
 $buttonFont         = isset( $attributes['buttonFont'] ) ? $attributes['buttonFont'] : 'inherit';
 $buttonTextSize     = isset( $attributes['buttonTextSize'] ) ? $attributes['buttonTextSize'] : 14;
 $buttonFontWeight   = isset( $attributes['buttonFontWeight'] ) ? $attributes['buttonFontWeight'] : 'normal';
-$ButtonSize         = isset( $attributes['ButtonSize'] ) ? $attributes['ButtonSize'] : 48;
+$buttonSize         = isset( $attributes['buttonSize'] ) ? $attributes['buttonSize'] : 48;
 
 // Label styling for modal fields
 $labelFont          = isset( $attributes['labelFont'] ) ? $attributes['labelFont'] : 'inherit';
@@ -53,8 +113,8 @@ $output .= '<button id="hrdc-open-search-modal" class="btn" style="
 	border:1px solid ' . esc_attr( $borderColor ) . ';
 	border-radius:' . esc_attr( $borderRadius ) . 'px;
 	padding:10px;
-	height:' . esc_attr( $ButtonSize ) . 'px;
-	width:' . esc_attr( $ButtonSize * 3 ) . 'px;
+	height:' . esc_attr( $buttonSize ) . 'px;
+	width:' . esc_attr( $buttonSize * 3 ) . 'px;
 	font-size:' . esc_attr( $buttonTextSize ) . 'px;
 	font-family:' . esc_attr( $buttonFont ) . ';
 	font-weight:' . esc_attr( $buttonFontWeight ) . ';
@@ -97,9 +157,9 @@ $output .= '<div class="modal-fields-front-preview" style="
 // City Field.
 if ( $cityShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
-	$output .= '<label for="hrdc-city" style="' . $labelStyle . '">' . __( 'City', 'hrdc-custom-tools' ) . '</label><br/>';
+	$output .= '<label for="hrdc-city" style="' . $labelStyle . '">' . esc_html( $lbl['city'] ). '</label><br/>';
 	$output .= '<select id="hrdc-city" style="width:90%">';
-	$output .= '<option value="">' . __( 'Any', 'hrdc-custom-tools' ) . '</option>';
+	$output .= '<option value="">' . esc_html( $lbl['any'] ) . '</option>';
 	$output .= '<option value="bozeman">Bozeman</option>';
 	$output .= '<option value="belgrade">Belgrade</option>';
 	$output .= '<option value="west yellowstone">West Yellowstone</option>';
@@ -113,13 +173,13 @@ if ( $cityShow ) {
 // Demographic Field.
 if ( $demographicShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
-	$output .= '<label for="hrdc-demographic" style="' . $labelStyle . '">' . __( 'Demographic', 'hrdc-custom-tools' ) . '</label><br/>';
+	$output .= '<label for="hrdc-demographic" style="' . $labelStyle . '">' . $lbl['demo'] . '</label><br/>';
 	$output .= '<select id="hrdc-demographic" style="width:90%">';
     $output .= '<option value="">' . __( '', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="None of the above">' . __( 'None of the above', 'hrdc-custom-tools' ) . '</option>';
-    $output .= '<option value="senior (55+)">' . __( 'Senior (55+)', 'hrdc-custom-tools' ) . '</option>';
-    $output .= '<option value="senior (62+)">' . __( 'Senior (62+)', 'hrdc-custom-tools' ) . '</option>';
-    $output .= '<option value="person with disabling condition">' . __( 'Person with Disabling Condition', 'hrdc-custom-tools' ) . '<option>';
+	$output .= '<option value="None of the above">' . $lbl['noneAbove'] . '</option>';
+    $output .= '<option value="senior (55+)">' . $lbl['sen55'] . '</option>';
+    $output .= '<option value="senior (62+)">' . $lbl['sen62']. '</option>';
+    $output .= '<option value="person with disabling condition">' . $lbl['disabled'] . '<option>';
 	$output .= '</select>';
 	$output .= '</div>';
 }
@@ -127,11 +187,11 @@ if ( $demographicShow ) {
 // Felony Field.
 if ( $feloniesShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
-	$output .= '<label for="hrdc-felonies" style="' . $labelStyle . '">' . __( 'Do you have a felony conviction?', 'hrdc-custom-tools' ) . '</label><br/>';
+	$output .= '<label for="hrdc-felonies" style="' . $labelStyle . '">' . $lbl['felonyQ'] . '</label><br/>';
 	$output .= '<select id="hrdc-felonies" style="width:90%">';
     $output .= '<option value="">' . __( '', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="no">' . __( 'No', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="yes">' . __( 'Yes', 'hrdc-custom-tools' ) . '</option>';
+	$output .= '<option value="no">' . $lbl['no'] . '</option>';
+	$output .= '<option value="yes">' . $lbl['yes'] . '</option>';
 	$output .= '</select>';
 	$output .= '</div>';
 }
@@ -139,11 +199,11 @@ if ( $feloniesShow ) {
 // Credit Field.
 if ( $creditCheckShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
-	$output .= '<label for="hrdc-credit" style="' . $labelStyle . '">' . __( 'Do you have good credit (above 600+)?', 'hrdc-custom-tools' ) . '</label><br/>';
+	$output .= '<label for="hrdc-credit" style="' . $labelStyle . '">' . $lbl['creditQ']. '</label><br/>';
 	$output .= '<select id="hrdc-credit" style="width:90%">';
     $output .= '<option value="">' . __( '', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="no">' . __( 'No', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="yes">' . __( 'Yes', 'hrdc-custom-tools' ) . '</option>';
+	$output .= '<option value="no">' . $lbl['no'] . '</option>';
+	$output .= '<option value="yes">' . $lbl['yes'] . '</option>';
 	$output .= '</select>';
 	$output .= '</div>';
 }
@@ -153,12 +213,12 @@ if ( $unitTypesShow ) {
     $output .= '<div class="modal-field" style="margin-bottom:10px;">';
     $output .= '<label for="hrdc-unit-types" style="' . $labelStyle . '">' . __( 'Unit Types', 'hrdc-custom-tools' ) . '</label><br/>';
     $output .= '<select id="hrdc-unit-types" style="width:90%">';
-    $output .= '<option value="">' . __( 'Any', 'hrdc-custom-tools' ) . '</option>';
-    $output .= '<option value="studio">' . __( 'Studio', 'hrdc-custom-tools' ) . '</option>';
-    $output .= '<option value="1-bedroom">' . __( '1-Bedroom', 'hrdc-custom-tools' ) . '</option>';
-    $output .= '<option value="2-bedrooms">' . __( '2-Bedrooms', 'hrdc-custom-tools' ) . '</option>';
-    $output .= '<option value="3-bedrooms">' . __( '3-Bedrooms', 'hrdc-custom-tools' ) . '</option>';
-    $output .= '<option value="4+-bedrooms">' . __( '4+-Bedrooms', 'hrdc-custom-tools' ) . '</option>';
+    $output .= '<option value="">' . $lbl['any'] . '</option>';
+    $output .= '<option value="studio">' .$lbl['studio'] . '</option>';
+    $output .= '<option value="1-bedroom">' . $lbl['1bed'] . '</option>';
+    $output .= '<option value="2-bedrooms">' . $lbl['2bed'] . '</option>';
+    $output .= '<option value="3-bedrooms">' . $lbl['3bed'] . '</option>';
+    $output .= '<option value="4+-bedrooms">' . $lbl['4bed']. '</option>';
     $output .= '</select>';
     $output .= '</div>';
 }
@@ -166,11 +226,11 @@ if ( $unitTypesShow ) {
 // Pets Field.
 if ( $petsShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
-	$output .= '<label for="hrdc-pets" style="' . $labelStyle . '">' . __( 'Are you looking for pet friendly units (for non‑service animals)?', 'hrdc-custom-tools' ) . '</label><br/>';
+	$output .= '<label for="hrdc-pets" style="' . $labelStyle . '">' . $lbl['petsQ'] . '</label><br/>';
 	$output .= '<select id="hrdc-pets" style="width:90%">';
     $output .= '<option value="">' . __( '', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="no">' . __( 'No', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="yes">' . __( 'Yes', 'hrdc-custom-tools' ) . '</option>';
+	$output .= '<option value="no">' . $lbl['no'] . '</option>';
+	$output .= '<option value="yes">' . $lbl['yes'] . '</option>';
 	$output .= '</select>';
 	$output .= '</div>';
 }
@@ -178,11 +238,11 @@ if ( $petsShow ) {
 // Social Security Field.
 if ( $socialSecurityShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
-	$output .= '<label for="hrdc-social" style="' . $labelStyle . '">' . __( 'Do you have a social security number?', 'hrdc-custom-tools' ) . '</label><br/>';
+	$output .= '<label for="hrdc-social" style="' . $labelStyle . '">' . $lbl['ssnQ']. '</label><br/>';
 	$output .= '<select id="hrdc-social" style="width:90%">';
     $output .= '<option value="">' . __( '', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="no">' . __( 'No', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="yes">' . __( 'Yes', 'hrdc-custom-tools' ) . '</option>';
+	$output .= '<option value="no">' . $lbl['no'] . '</option>';
+	$output .= '<option value="yes">' . $lbl['yes'] . '</option>';
 	$output .= '</select>';
 	$output .= '</div>';
 }
@@ -190,13 +250,13 @@ if ( $socialSecurityShow ) {
 // Housing Types Field.
 if ( $categoryShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
-	$output .= '<label for="hrdc-housing-types" style="' . $labelStyle . '">' . __( 'Housing Types', 'hrdc-custom-tools' ) . '</label><br/>';
+	$output .= '<label for="hrdc-housing-types" style="' . $labelStyle . '">' . $lbl['housing'] . '</label><br/>';
 	$output .= '<select id="hrdc-housing-types" style="width:90%">';
     $output .= '<option value="">' . __( '', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="">' . __( 'Any', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="low income tax credit">' . __( 'Low Income Tax Credit', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="subsidized housing">' . __( 'Subsidized Housing', 'hrdc-custom-tools' ) . '</option>';
-	$output .= '<option value="market rate">' . __( 'Market Rate', 'hrdc-custom-tools' ) . '</option>';
+	$output .= '<option value="">' . $lbl['any'] . '</option>';
+	$output .= '<option value="low income tax credit">' . $lbl['lowIncome'] . '</option>';
+	$output .= '<option value="subsidized housing">' . $lbl['subsidized']. '</option>';
+	$output .= '<option value="market rate">' . $lbl['market'] . '</option>';
 	$output .= '</select>';
 	$output .= '</div>';
 }
@@ -211,7 +271,7 @@ $output .= '<button class="btn" id="hrdc-apply-search" style="
 	border-radius:4px;
 	cursor:pointer;
 	margin-right:10px;
-">' . __( 'Apply Filters', 'hrdc-custom-tools' ) . '</button>';
+">' . $lbl['btnApply']. '</button>';
 $output .= '<button class="btn" id="hrdc-reset-search" style="
 	background-color:#fff;
 	color:#0073aa;
@@ -219,7 +279,7 @@ $output .= '<button class="btn" id="hrdc-reset-search" style="
 	padding:8px 16px;
 	border-radius:4px;
 	cursor:pointer;
-">' . __( 'Reset Filters', 'hrdc-custom-tools' ) . '</button>';
+">' . $lbl['btnReset'] . '</button>';
 $output .= '</div>';
 
 $output .= '</div>'; // end modal-fields-front-preview
