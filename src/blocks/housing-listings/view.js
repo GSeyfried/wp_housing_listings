@@ -5,6 +5,21 @@ document.addEventListener('hrdcApplyFilters', function(event) {
     updateListings(filteredListings);
 });
 
+if (!window.hrdcBlockAttr) window.hrdcBlockAttr = {}; // Ensure hrdcBlockAttr is defined
+const a = window.hrdcBlockAttr || {};
+
+function applyGridWidth () {
+    const wrap = document.querySelector('.hrdc-housing-listings');
+    if (!wrap) return;
+	const cols   = Number(a.cardColumns) || 2;
+	const width  = Number(a.cardWidth)   || 500;
+    wrap.style.display             = 'grid';
+    wrap.style.gridTemplateColumns = `repeat(${cols}, ${width}px)`;
+    wrap.style.gap                 = '20px';
+}
+setTimeout(applyGridWidth, 0); // Apply grid width after a short delay to ensure it takes effect.
+window.addEventListener('resize', applyGridWidth); // Reapply grid width on window resize
+
 function advancedFilterListings(listings, filters) {
 	// Normalize a yes/no input.
 	function normalizeYesNo(input) {
@@ -134,9 +149,22 @@ function advancedFilterListings(listings, filters) {
 			   unitTypesMatch && petsAllowedMatch && socialSecMatch && categoryMatch;
 	});
 }
-const a = window.hrdcBlockAttr || {};
 
-function getFontStyles() {
+function translateCategory (cat) {
+    if (!window.hrdcBlockAttr?.isSpanish) return cat;
+    const map = {
+        'Income-Restricted SUBSIDIZED Rentals':
+            'Viviendas SUBSIDIADAS con restricción de ingresos',
+        'Income-Restricted AFFORDABLE Rentals':
+            'Viviendas ASEQUIBLES con restricción de ingresos',
+        'Property Management and Market Rate Apartments':
+            'Administración de propiedades y apartamentos de precio de mercado',
+    };
+    return map[cat] || cat;
+}
+
+function getFontStyles () {
+    const a = window.hrdcBlockAttr || {};
     return {
         title: `font-size:${a.cardTitleFontSize}px;color:${a.cardTitleColor};text-align:${a.cardTitleTextAlign};font-weight:${a.cardTitleFontWeight};font-style:${a.cardTitleFontStyle};padding-bottom:${a.cardTitlePadding}px;`,
         info : `font-family:${a.cardFontFamily};text-align:${a.cardTextAlign};font-weight:${a.cardValueFontWeight};font-style:${a.cardValueFontStyle};`,
@@ -145,56 +173,59 @@ function getFontStyles() {
 }
 const style = getFontStyles();
 
+const LBL = a.isSpanish
+? { address:'Dirección', manager:'Gerente', phone:'Teléfono',
+	website:'Sitio web', category:'Categoría', desc:'Descripción',
+	noneWeb:'No sitio web', nonePhone:'No número de teléfono' }
+: { address:'Address',   manager:'Manager', phone:'Phone',
+	website:'Website',   category:'Category', desc:'Description',
+	noneWeb:'No website', nonePhone:'No phone number' };
+
 
 function updateListings(filteredListings) {
+	const style = getFontStyles();
+
     const container = document.getElementById('hl-results');
     if (!container) return;
-	const style = getFontStyles();   // title / info / label
-	const lbl   = a.isSpanish
-		? { address:'Dirección', manager:'Gerente', phone:'Teléfono',
-			website:'Sitio web', category:'Categoría', desc:'Descripción',
-			noneWeb:'No sitio web', nonePhone:'No número de teléfono' }
-		: { address:'Address',   manager:'Manager', phone:'Phone',
-			website:'Website',   category:'Category', desc:'Description',
-			noneWeb:'No website', nonePhone:'No phone number' };
 
     // Rebuild the container's content.
     let html = '';
-	
 
     if (filteredListings.length > 0) {
         filteredListings.forEach(post => {
-                const meta = post.meta || {};
+			const meta = post.meta || {};
+			const hasWeb  = meta._website && meta._website.startsWith('http');
+
             html += `<div class="listing-box">
                         <div class="listing-row">
                             <div class="listing-left">
                                 <div class="listing-title" style="${style.title}">${ post.title }</div>
                                 <div class="listing-info" style="${style.info}">
-                                     <em style="${style.label}">${lbl.address}:</em>
+                                     <em style="${style.label}">${LBL.address}:</em>
 									${ meta._address || 'N/A' }${ meta._city ? ', ' + meta._city : '' }
                                 </div>
                                 <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${lbl.manager}:</em>
+                                    <em style="${style.label}">${LBL.manager}:</em>
 									${ meta._property_manager || 'N/A' }
                                 </div>
                                 <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${lbl.phone}:</em>
-									${ meta._phone ? meta._phone : lbl.nonePhone }
+                                    <em style="${style.label}">${LBL.phone}:</em>
+									${ meta._phone ? meta._phone : LBL.nonePhone }
                                 </div>
                                 <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${lbl.website}:</em>
-									${ meta._website
+                                    <em style="${style.label}">${LBL.website}:</em>
+									${ hasWeb
 										? `<a href="${meta._website}" target="_blank">${meta._website}</a>`
-										: lbl.noneWeb }
+										: LBL.noneWeb }
                                 </div>
                                 <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${lbl.category}:</em>
-									${ meta._category || 'N/A' }
+                                    <em style="${style.label}">${LBL.category}:</em>
+									${ translateCategory(meta._category || '') }
                                 </div>
                             </div>
                             <div class="listing-right">
                                 <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${lbl.desc}:</em><br>
+                                    <em style="${style.label}">${LBL.desc}:</em><br>
 									<span style="${style.info}">${ post.content }</span>
                                 </div>
                             </div>
@@ -205,7 +236,7 @@ function updateListings(filteredListings) {
         html = '<p>No listings match your filters.</p>';
     }
     container.innerHTML = html;
-
+	applyGridWidth();  // Reapply grid width after updating listings.
     document.getElementById('hl-results').innerHTML = html;
     
     // Update the count banner with the number of filtered listings.
