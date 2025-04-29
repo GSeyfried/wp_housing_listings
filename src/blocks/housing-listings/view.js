@@ -1,24 +1,94 @@
-document.addEventListener('hrdcApplyFilters', function(event) {
-    // hlData should be localized (an array of listing objects)
-    const filteredListings = advancedFilterListings(hlData, event.detail);
-
-    updateListings(filteredListings);
-});
+/**
+ * HRDC – front-end logic for the “Housing Listings” block
+ * -------------------------------------------------------
+ * – Listens for the custom event  ➜  filters the array in hlData
+ * – Re-renders the cards with identical structure / styles
+ * – Keeps grid, fonts and translation intact after every refresh
+ */
 
 if (!window.hrdcBlockAttr) window.hrdcBlockAttr = {}; // Ensure hrdcBlockAttr is defined
 const a = window.hrdcBlockAttr || {};
 
+/* --------------------------------------------------------
+ *  Helper – grid template driven by block attributes
+ * ------------------------------------------------------ */
 function applyGridWidth () {
-    const wrap = document.querySelector('.hrdc-housing-listings');
-    if (!wrap) return;
-	const cols   = Number(a.cardColumns) || 2;
-	const width  = Number(a.cardWidth)   || 500;
-    wrap.style.display             = 'grid';
-    wrap.style.gridTemplateColumns = `repeat(${cols}, ${width}px)`;
-    wrap.style.gap                 = '20px';
+	const a    = window.hrdcBlockAttr || {};          // block attributes passed from PHP
+	const wrap = document.querySelector('.hrdc-housing-listings');
+	if (!wrap) return;
+
+	const cols  = Number(a.cardColumns) || 1;
+	const width = Number(a.cardWidth)   || 900;
+
+	wrap.style.display             = 'grid';
+	wrap.style.gridTemplateColumns = `repeat(${cols}, ${width}px)`;
+	wrap.style.gap                 = '20px';
 }
-setTimeout(applyGridWidth, 0); // Apply grid width after a short delay to ensure it takes effect.
-window.addEventListener('resize', applyGridWidth); // Reapply grid width on window resize
+
+setTimeout(applyGridWidth,  0);      // after initial paint
+window.addEventListener('resize', applyGridWidth);
+
+/* --------------------------------------------------------
+ *  Typography helpers (updated on every redraw)
+ * ------------------------------------------------------ */
+function getFontStyles () {
+	const a = window.hrdcBlockAttr || {};
+	return {
+		title : `font-size:${a.cardTitleFontSize}px;color:${a.cardTitleColor};text-align:${a.cardTitleTextAlign};font-weight:${a.cardTitleFontWeight};font-style:${a.cardTitleFontStyle};padding-bottom:${a.cardTitlePadding}px;`,
+		info  : `font-family:${a.cardFontFamily};text-align:${a.cardTextAlign};font-weight:${a.cardValueFontWeight};font-style:${a.cardValueFontStyle};`,
+		label : `font-weight:${a.cardLabelFontWeight};font-style:${a.cardLabelFontStyle};`
+	};
+}
+
+/* updated to handle category name changes*/
+function translateCategory(raw) {
+	const span = window.hrdcBlockAttr?.isSpanish;     // bool
+
+	/* ---- normalise incoming value ---- */
+	const cat = (raw || '').toLowerCase().trim();
+
+	let key;
+	if ([
+		'low-income tax-credit eligible',
+		'low income tax credit eligible',
+		'income-restricted affordable rentals',
+	].includes(cat)) {
+		key = 'affordable';
+	} else if (cat === 'income-restricted subsidized rentals') {
+		key = 'subsidized';
+	} else if (cat === 'property management and market rate apartments') {
+		key = 'market';
+	}
+
+	const labels = {
+		affordable : {
+			en: 'Low-Income Tax-Credit Eligible',
+			es: 'Viviendas ASEQUIBLES con restricción de ingresos',
+		},
+		subsidized : {
+			en: 'Income-Restricted SUBSIDIZED Rentals',
+			es: 'Viviendas SUBSIDIADAS con restricción de ingresos',
+		},
+		market : {
+			en: 'Property Management and Market Rate Apartments',
+			es: 'Gestión de propiedades y apartamentos de precio de mercado',
+		},
+	};
+
+	return key ? labels[key][ span ? 'es' : 'en' ] : raw;
+}
+
+
+function getLabels() {
+    const a = window.hrdcBlockAttr || {};
+    return a.isSpanish
+        ? { address:'Dirección', manager:'Gerente', phone:'Teléfono',
+            website:'Sitio web', category:'Categoría', desc:'Descripción',
+            noneWeb:'No sitio web', nonePhone:'No número de teléfono' }
+        : { address:'Address',   manager:'Manager', phone:'Phone',
+            website:'Website',   category:'Category', desc:'Description',
+            noneWeb:'No website', nonePhone:'No phone number' };
+}
 
 function advancedFilterListings(listings, filters) {
 	// Normalize a yes/no input.
@@ -40,10 +110,10 @@ function advancedFilterListings(listings, filters) {
 				.map(v => v.trim())
 				.filter(v => v);
 		}
-        function extractAgeIfSenior(input) {
-            const match = input.match(/\d+/);
-            return match ? parseInt(match[0], 10) : null;
-        }
+		function extractAgeIfSenior(input) {
+			const match = input.match(/\d+/);
+			return match ? parseInt(match[0], 10) : null;
+		}
 
 		const preferredList = splitValues(preferred);
 		const allowedList = splitValues(allowed);
@@ -53,19 +123,19 @@ function advancedFilterListings(listings, filters) {
 		if (allowedList.includes("no")) return true;
 		if (preferredList.length === 0) return true;
 		const seniorMatch = preferredList.some(preferredItem => {
-            if (preferredItem.includes("senior")) {
-                // Look for an allowed item that includes "senior"
-                const matchingAllowed = allowedList.find(allowedItem => allowedItem.includes("senior"));
-                if (matchingAllowed) {
-                    const prefAge = extractAgeIfSenior(preferredItem);
-                    const allowedAge = extractAgeIfSenior(matchingAllowed);
-                    return (prefAge !== null && allowedAge !== null) ? allowedAge <= prefAge : false;
-                }
-            }
-            return false;
-        });        
-          return seniorMatch || preferredList.some(pref => allowedList.includes(pref));
-        }
+			if (preferredItem.includes("senior")) {
+				// Look for an allowed item that includes "senior"
+				const matchingAllowed = allowedList.find(allowedItem => allowedItem.includes("senior"));
+				if (matchingAllowed) {
+					const prefAge = extractAgeIfSenior(preferredItem);
+					const allowedAge = extractAgeIfSenior(matchingAllowed);
+					return (prefAge !== null && allowedAge !== null) ? allowedAge <= prefAge : false;
+				}
+			}
+			return false;
+		});        
+			return seniorMatch || preferredList.some(pref => allowedList.includes(pref));
+		}
 
 	// Compare unit types.
 	function funUnitTypesMatch(preferred, allowed) {
@@ -134,111 +204,94 @@ function advancedFilterListings(listings, filters) {
 		const categoryMatch     = !filters.category || filters.category.toLowerCase() === ''|| funCategoryMatch(filters.category, category);
 
 		/*
-        console.log("City:", city, "Filter:", filters.city, "Match:", cityMatch);
-        console.log("Reserved For:", reservedFor, "Filter:", filters.reservedFor, "Match:", reservedForMatch);
-        console.log("Application Fee:", appFee, "Match:", appFeeMatch);
-        console.log("Felonies:", felonies, "Filter:", filters.felonies, "Match:", feloniesMatch);
-        console.log("Credit Check:", creditCheck, "Filter:", filters.creditCheck, "Match:", creditCheckMatch);
-        console.log("Unit Types:", unitTypes, "Filter:", filters.unitTypes, "Match:", unitTypesMatch);
-        console.log("Pets Allowed:", petsAllowed, "Filter:", filters.pets, "Match:", petsAllowedMatch);
-        console.log("Social Security:", socialSec, "Filter:", filters.socialSecurity, "Match:", socialSecMatch);
-        console.log("Category:", category, "Filter:", filters.category, "Match:", categoryMatch);
+		console.log("City:", city, "Filter:", filters.city, "Match:", cityMatch);
+		console.log("Reserved For:", reservedFor, "Filter:", filters.reservedFor, "Match:", reservedForMatch);
+		console.log("Application Fee:", appFee, "Match:", appFeeMatch);
+		console.log("Felonies:", felonies, "Filter:", filters.felonies, "Match:", feloniesMatch);
+		console.log("Credit Check:", creditCheck, "Filter:", filters.creditCheck, "Match:", creditCheckMatch);
+		console.log("Unit Types:", unitTypes, "Filter:", filters.unitTypes, "Match:", unitTypesMatch);
+		console.log("Pets Allowed:", petsAllowed, "Filter:", filters.pets, "Match:", petsAllowedMatch);
+		console.log("Social Security:", socialSec, "Filter:", filters.socialSecurity, "Match:", socialSecMatch);
+		console.log("Category:", category, "Filter:", filters.category, "Match:", categoryMatch);
 		*/
 
 		return cityMatch && reservedForMatch && appFeeMatch && feloniesMatch && creditCheckMatch &&
-			   unitTypesMatch && petsAllowedMatch && socialSecMatch && categoryMatch;
+				unitTypesMatch && petsAllowedMatch && socialSecMatch && categoryMatch;
 	});
 }
 
-function translateCategory (cat) {
-    if (!window.hrdcBlockAttr?.isSpanish) return cat;
-    const map = {
-        'Income-Restricted SUBSIDIZED Rentals':
-            'Viviendas SUBSIDIADAS con restricción de ingresos',
-        'Income-Restricted AFFORDABLE Rentals':
-            'Viviendas ASEQUIBLES con restricción de ingresos',
-        'Property Management and Market Rate Apartments':
-            'Administración de propiedades y apartamentos de precio de mercado',
-    };
-    return map[cat] || cat;
+/* --------------------------------------------------------
+ *  Main render routine
+ * ------------------------------------------------------ */
+function updateListings(list) {
+
+	const style = getFontStyles();    // fresh snapshot for every call
+	const LBL   = getLabels();
+	const out   = [];
+
+	list.forEach(post => {
+		const m      = post.meta || {};
+		const hasWeb = m._website && m._website.startsWith('http');
+
+		out.push(`
+		<div class="listing-box">
+			<div class="listing-row" style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+				<!-- left column : title + meta -->
+				<div class="listing-left" style="flex:1 1 320px; min-width:260px;">
+					<div class="listing-title" style="${style.title}">${post.title}</div>
+
+					<div class="listing-info" style="${style.info}">
+						<em style="${style.label}">${LBL.address}:</em>
+						${m._address || 'N/A'}${m._city ? ', ' + m._city : ''}
+					</div>
+
+					<div class="listing-info" style="${style.info}">
+						<em style="${style.label}">${LBL.manager}:</em>
+						${m._property_manager || 'N/A'}
+					</div>
+
+					<div class="listing-info" style="${style.info}">
+						<em style="${style.label}">${LBL.phone}:</em>
+						${m._phone || LBL.nonePhone}
+					</div>
+
+					<div class="listing-info" style="${style.info}">
+						<em style="${style.label}">${LBL.website}:</em>
+						${ hasWeb ? `<a href="${m._website}" target="_blank">${m._website}</a>` : LBL.noneWeb }
+					</div>
+
+					<div class="listing-info" style="${style.info}">
+						<em style="${style.label}">${LBL.category}:</em>
+						${ translateCategory(m._category || '') }
+					</div>
+				</div>
+
+				<!-- right column : description -->
+				<div class="listing-right" style="flex:1 1 360px;min-width:260px;">
+					<div class="listing-info" style="${style.info}">
+						<em style="${style.label}">${LBL.desc}:</em><br>
+						<span style="${style.info}">${ post.content }</span>
+					</div>
+				</div>
+			</div>
+		</div>`);
+	});
+
+	const container = document.getElementById('hl-results');
+	container.innerHTML = list.length ? out.join('') : '<p>No listings match your filters.</p>';
+
+	applyGridWidth();   // keep grid intact
+	document.getElementById('hl-results-count').textContent = `Displaying ${list.length} listings`;
 }
 
-function getFontStyles () {
-    const a = window.hrdcBlockAttr || {};
-    return {
-        title: `font-size:${a.cardTitleFontSize}px;color:${a.cardTitleColor};text-align:${a.cardTitleTextAlign};font-weight:${a.cardTitleFontWeight};font-style:${a.cardTitleFontStyle};padding-bottom:${a.cardTitlePadding}px;`,
-        info : `font-family:${a.cardFontFamily};text-align:${a.cardTextAlign};font-weight:${a.cardValueFontWeight};font-style:${a.cardValueFontStyle};`,
-        label: `font-weight:${a.cardLabelFontWeight};font-style:${a.cardLabelFontStyle};`
-    };
-}
-const style = getFontStyles();
+/* --------------------------------------------------------
+ *  First render = whole list
+ * ------------------------------------------------------ */
+updateListings(window.hlData || []);
 
-const LBL = a.isSpanish
-? { address:'Dirección', manager:'Gerente', phone:'Teléfono',
-	website:'Sitio web', category:'Categoría', desc:'Descripción',
-	noneWeb:'No sitio web', nonePhone:'No número de teléfono' }
-: { address:'Address',   manager:'Manager', phone:'Phone',
-	website:'Website',   category:'Category', desc:'Description',
-	noneWeb:'No website', nonePhone:'No phone number' };
-
-
-function updateListings(filteredListings) {
-	const style = getFontStyles();
-
-    const container = document.getElementById('hl-results');
-    if (!container) return;
-
-    // Rebuild the container's content.
-    let html = '';
-
-    if (filteredListings.length > 0) {
-        filteredListings.forEach(post => {
-			const meta = post.meta || {};
-			const hasWeb  = meta._website && meta._website.startsWith('http');
-
-            html += `<div class="listing-box">
-                        <div class="listing-row">
-                            <div class="listing-left">
-                                <div class="listing-title" style="${style.title}">${ post.title }</div>
-                                <div class="listing-info" style="${style.info}">
-                                     <em style="${style.label}">${LBL.address}:</em>
-									${ meta._address || 'N/A' }${ meta._city ? ', ' + meta._city : '' }
-                                </div>
-                                <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${LBL.manager}:</em>
-									${ meta._property_manager || 'N/A' }
-                                </div>
-                                <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${LBL.phone}:</em>
-									${ meta._phone ? meta._phone : LBL.nonePhone }
-                                </div>
-                                <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${LBL.website}:</em>
-									${ hasWeb
-										? `<a href="${meta._website}" target="_blank">${meta._website}</a>`
-										: LBL.noneWeb }
-                                </div>
-                                <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${LBL.category}:</em>
-									${ translateCategory(meta._category || '') }
-                                </div>
-                            </div>
-                            <div class="listing-right">
-                                <div class="listing-info" style="${style.info}">
-                                    <em style="${style.label}">${LBL.desc}:</em><br>
-									<span style="${style.info}">${ post.content }</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-        });
-    } else {
-        html = '<p>No listings match your filters.</p>';
-    }
-    container.innerHTML = html;
-	applyGridWidth();  // Reapply grid width after updating listings.
-    document.getElementById('hl-results').innerHTML = html;
-    
-    // Update the count banner with the number of filtered listings.
-    document.getElementById('hl-results-count').innerText = `Displaying ${ filteredListings.length } listings`;
-}
+/* --------------------------------------------------------
+ *  Listen for filters
+ * ------------------------------------------------------ */
+document.addEventListener('hrdcApplyFilters', (e) => {
+	updateListings( advancedFilterListings(hlData, e.detail) );
+});

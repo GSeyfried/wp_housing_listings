@@ -12,7 +12,7 @@
     },
     "buttonColor": {
       "type": "string",
-      "default": "#0073aa"
+      "default": "#147278"
     },
     "buttonSize": {
       "type": "number",

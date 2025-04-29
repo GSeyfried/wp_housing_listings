@@ -18,26 +18,51 @@ $query = new WP_Query( array(
 $is_spanish = ( get_locale() === 'es_ES' );   // or after switch_to_locale()
 $listings_data = array();
 
-//translate categories
+//translate categories: I was asked to change the categories multiple times so this should make it better with current descrpencies and ready it for future changes.
 if ( ! function_exists( 'hrdc_translate_category' ) ) {
-    function hrdc_translate_category ( $cat, $spanish = false ) {
-        $map = [
-            'Income-Restricted SUBSIDIZED Rentals' => [
-                'en' => 'Income‑Restricted SUBSIDIZED Rentals',
-                'es' => 'Viviendas SUBSIDIADAS con restricción de ingresos',
-            ],
-            'Income-Restricted AFFORDABLE Rentals' => [
-                'en' => 'Income‑Restricted AFFORDABLE Rentals',
-                'es' => 'Viviendas ASEQUIBLES con restricción de ingresos',
-            ],
-            'Property Management and Market Rate Apartments' => [
-                'en' => 'Property Management and Market Rate Apartments',
-                'es' => 'Gestión de propiedades y apartamentos de precio de mercado',
-            ],
-        ];
-        return $map[ $cat ][ $spanish ? 'es' : 'en' ] ?? $cat;
-    }
+	function hrdc_translate_category( $raw_cat, $spanish = false ) {
+
+		// ── normalise the incoming value (case / extra spaces) ─────────
+		$cat = trim( strtolower( $raw_cat ) );
+
+		/* ---------- canonical look-ups ---------- */
+		$canon = [
+			// “affordable / lihtc” aliases
+			'low-income tax-credit eligible'        => 'affordable',
+			'low income tax credit eligible'        => 'affordable',
+			'income-restricted affordable rentals'  => 'affordable',
+
+			// subsidised
+			'income-restricted subsidized rentals'  => 'subsidized',
+
+			// market-rate / property mgmt
+			'property management and market rate apartments' => 'market',
+		];
+
+		$key = $canon[ $cat ] ?? null;        // null = unknown / passthrough
+
+		/* ---------- what we show to the end user ---------- */
+		$labels = [
+			'affordable' => [
+				'en' => 'Low-Income Tax-Credit Eligible',
+				'es' => 'Viviendas ASEQUIBLES con restricción de ingresos',
+			],
+			'subsidized' => [
+				'en' => 'Income-Restricted SUBSIDIZED Rentals',
+				'es' => 'Viviendas SUBSIDIADAS con restricción de ingresos',
+			],
+			'market' => [
+				'en' => 'Property Management and Market Rate Apartments',
+				'es' => 'Gestión de propiedades y apartamentos de precio de mercado',
+			],
+		];
+
+		return $key && isset( $labels[ $key ] )
+			? $labels[ $key ][ $spanish ? 'es' : 'en' ]
+			: $raw_cat;               // unknown → show as-is
+	}
 }
+
 
 if ( $query->have_posts() ) {
     while ( $query->have_posts() ) {
@@ -48,17 +73,16 @@ if ( $query->have_posts() ) {
         if ( $is_spanish ) {
             $desc_raw  = get_post_meta( $post_id, '_description_es', true );
             $desc_html = nl2br( wp_kses_post( $desc_raw ) );   // show <br>
-            } else {
-                $desc_raw  = apply_filters( 'the_content', get_the_content() );
-                $desc_html = wp_kses_post( $desc_raw );            // already has tags
-            }
-            $desc_json = esc_html( $desc_raw );  // json for view.js
+        } else {
+            $desc_raw  = apply_filters( 'the_content', get_the_content() );
+            $desc_html = wp_kses_post( $desc_raw );            // already HTML
+        }
 
         $listings_data[] = array(
-            'id'         => $post_id,
-            'title'      => get_the_title(),
-            'content'    => $desc_json,
-            'meta'       => array(
+            'id'      => $post_id,
+            'title'   => get_the_title(),
+            'content' => $desc_html,        // <— real HTML
+            'meta'    => array(
                 '_address'                => get_post_meta( $post_id, '_address', true ) ?: '',
                 '_city'                   => get_post_meta( $post_id, '_city', true ) ?: '',
                 '_property_manager'       => get_post_meta( $post_id, '_property_manager', true ) ?: '',
@@ -100,7 +124,7 @@ $cardTitlePadding    = isset( $attributes['cardTitlePadding'] ) ? $attributes['c
 $cardBackground      = isset( $attributes['cardBackground'] ) ? $attributes['cardBackground'] : '#fff';
 $cardRadius          = isset( $attributes['cardRadius'] ) ? $attributes['cardRadius'] : 10;
 $cardShadow          = isset( $attributes['cardShadow'] ) ? $attributes['cardShadow'] : '0 2px 4px rgba(0,0,0,0.1)';
-$cardWidth           = isset( $attributes['cardWidth'] ) ? $attributes['cardWidth'] : 300;
+$cardWidth           = isset( $attributes['cardWidth'] ) ? $attributes['cardWidth'] : 900;
 $cardColumns         = isset( $attributes['cardColumns'] ) ? $attributes['cardColumns'] : 2;
 $cardFontFamily      = isset( $attributes['cardFontFamily'] ) ? $attributes['cardFontFamily'] : 'inherit';
 $cardTextAlign       = isset( $attributes['cardTextAlign'] ) ? $attributes['cardTextAlign'] : 'left';
@@ -120,6 +144,7 @@ $custom_styles = '<style>
 }
 .hrdc-housing-listings .listing-box {
     border: ' . esc_attr( $cardBorder ) . ';
+    width: 100% !important;
     padding: ' . esc_attr( $cardInnerPadding ) . 'px;
     margin: ' . esc_attr( $cardOuterPadding ) . 'px;
     background-color: ' . esc_attr( $cardBackground ) . ';
@@ -127,6 +152,7 @@ $custom_styles = '<style>
     box-shadow: ' . esc_attr( $cardShadow ) . ';
 }
 .hrdc-housing-listings .listing-title {
+    font-weight:700;
     font-size: ' . esc_attr( $cardTitleFontSize ) . 'px;
     color: ' . esc_attr( $cardTitleColor ) . ';
     text-align: ' . esc_attr( $cardTitleTextAlign ) . ';
@@ -136,8 +162,23 @@ $custom_styles = '<style>
 .hrdc-housing-listings .listing-info,
 .hrdc-housing-listings .listing-link {
     text-align: ' . esc_attr( $cardTextAlign ) . ';
+    font-weight: ' . esc_attr( $cardValueFontWeight ) . ';
+    font-style: ' . esc_attr( $cardValueFontStyle ) . ';
 }
-
+.hrdc-housing-listings .listing-row{
+	display:flex;
+	gap:16px;
+	align-items:flex-start;
+	flex-wrap:wrap;
+}
+.hrdc-housing-listings .listing-left{
+	flex:0 1 68%;          /* grow | shrink | basis  */
+	min-width:300px;
+}
+.hrdc-housing-listings .listing-right{
+	flex:0 1 30%;
+	min-width:200px;
+}
 </style>';
 
 /**
@@ -184,12 +225,6 @@ wp_add_inline_script(
 $handle = 'hrdc-tools-housing-listings-script';
 wp_enqueue_script( $handle );
 
-wp_add_inline_script(
-	$handle,
-	'window.hrdcBlockAttr = ' . wp_json_encode( $js_attr ) . ';',
-	'before'
-);
-
 echo $custom_styles;
 
 echo '<div id="hl-results-count" style="margin-bottom:10px; font-size:16px; color:#333;"></div>';
@@ -226,7 +261,7 @@ echo '<div ' . $wrapper_atts . '>';
 
             // Build each listing's HTML.
             echo '<div class="listing-box">';
-                echo '<div class="listing-row">';
+            echo '<div class="listing-row" style="display:flex;gap:16px;align-items:flex-start;">';
                     echo '<div class="listing-left">';
                         // Title
                         echo '<div class="listing-title" style="font-size:' . esc_attr( $cardTitleFontSize ) . 'px; color:' . esc_attr( $cardTitleColor ) . '; text-align:' . esc_attr( $cardTitleTextAlign ) . '; font-weight:' . esc_attr( $cardTitleFontWeight ) . '; font-style:' . esc_attr( $cardTitleFontStyle ) . '; padding-bottom:' . esc_attr( $cardTitlePadding ) . 'px;">' . get_the_title() . '</div>';

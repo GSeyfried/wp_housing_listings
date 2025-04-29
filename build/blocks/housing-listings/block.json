@@ -52,7 +52,7 @@
     },
     "cardWidth": {
       "type": "number",
-      "default": 300
+      "default": 900
     },
     "cardTitleFontSize": {
       "type": "number",
@@ -64,7 +64,7 @@
     },
     "cardTitleFontStyle": {
       "type": "string",
-      "default": "normal"
+      "default": "inherit"
     },
     "cardTitlePadding": {
       "type": "number",

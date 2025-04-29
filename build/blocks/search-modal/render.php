@@ -75,16 +75,17 @@ $borderRadius       = isset( $attributes['borderRadius'] ) ? $attributes['border
 $backgroundColor    = isset( $attributes['backgroundColor'] ) ? $attributes['backgroundColor'] : '#fff';
 
 // Button settings
+$buttonColor	   = isset( $attributes['buttonColor'] ) ? $attributes['buttonColor'] : '#147278';
 $buttonText         = isset( $attributes['buttonText'] ) ? $attributes['buttonText'] : $lbl['btnOpen'];
 $buttonFont         = isset( $attributes['buttonFont'] ) ? $attributes['buttonFont'] : 'inherit';
-$buttonTextSize     = isset( $attributes['buttonTextSize'] ) ? $attributes['buttonTextSize'] : 14;
+$buttonTextSize     = isset( $attributes['buttonTextSize'] ) ? $attributes['buttonTextSize'] : 24;
 $buttonFontWeight   = isset( $attributes['buttonFontWeight'] ) ? $attributes['buttonFontWeight'] : 'normal';
 $buttonSize         = isset( $attributes['buttonSize'] ) ? $attributes['buttonSize'] : 48;
 
 // Label styling for modal fields
 $labelFont          = isset( $attributes['labelFont'] ) ? $attributes['labelFont'] : 'inherit';
-$labelTextSize      = isset( $attributes['labelTextSize'] ) ? $attributes['labelTextSize'] : 14;
-$labelFontWeight    = isset( $attributes['labelFontWeight'] ) ? $attributes['labelFontWeight'] : 'normal';
+$labelTextSize      = isset( $attributes['labelTextSize'] ) ? $attributes['labelTextSize'] : 16;
+$labelFontWeight    = isset( $attributes['labelFontWeight'] ) ? $attributes['labelFontWeight'] : '600';
 
 // Field visibility toggles.
 $cityShow           = isset( $attributes['cityShow'] ) ? $attributes['cityShow'] : true;
@@ -109,9 +110,10 @@ $output .= '<div ' . $wrapper_atts . ' style="' . esc_attr( $container_style ) .
 // Trigger button.
 $output .= '<div class="search-modal-front-trigger" style="text-align:' . esc_attr( $align ) . '; margin-bottom:10px;">';
 $output .= '<button id="hrdc-open-search-modal" class="btn" style="
-	background-color:' . esc_attr( $backgroundColor ) . ';
+	background-color:' . esc_attr( $buttonColor ) . ';
 	border:1px solid ' . esc_attr( $borderColor ) . ';
 	border-radius:' . esc_attr( $borderRadius ) . 'px;
+	color:#fff;
 	padding:10px;
 	height:' . esc_attr( $buttonSize ) . 'px;
 	width:' . esc_attr( $buttonSize * 3 ) . 'px;
@@ -126,22 +128,25 @@ $output .= '</div>';
 // Modal overlay (hidden by default).
 $output .= '<div id="hrdc-modal-overlay" class="hrdc-search-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999;">';
 $output .= '<div class="hrdc-search-modal-content" style="
-	background:#fff;
+	background:' . esc_attr( $backgroundColor ) . ';
 	border-radius:' . esc_attr( $borderRadius ) . 'px;
-	width:600px;
-	max-width:90%;
+	width:600px; max-width:90%;
 	margin:60px auto;
-	padding:20px;
+	padding:30px;
 	position:relative;
 ">';
 $output .= '<button id="hrdc-close-search-modal" style="
-	position:absolute; 
-	top:8px; 
-	right:10px; 
-	border:none; 
-	background:none; 
-	font-size:48px; 
-	cursor:pointer;
+    position:absolute;
+    top:8px;right:10px;
+    width:32px;height:32px;                /* square box */
+    border:2px solidrgb(224, 83, 70);              /* red outline */
+    background:#c21807;                    /* red fill   */
+    color:#fff;                            /* always visible  */
+    font-size:20px;line-height:28px;       /* centre the ×   */
+    border-radius:4px;                     /* slight rounding */
+    cursor:pointer;
+    text-align:center;
+    padding:0;
 ">×</button>';
 
 // Modal fields container.

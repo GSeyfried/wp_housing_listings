@@ -7,7 +7,7 @@
 	"description": "Provides a modal pop-up for filtering housing listings. Use this block to trigger search criteria events.",
 	"attributes": {
 		"buttonText": { "type": "string", "default": "Search by Criteria" },
-		"buttonColor": { "type": "string", "default": "#0073aa" },
+		"buttonColor": { "type": "string", "default": "#147278" },
 		"buttonSize": {"type":"number", "default": 48},
 		"buttonTextSize": { "type": "number", "default": 14 },
 		"buttonFont": { "type": "string", "default": "inherit" },

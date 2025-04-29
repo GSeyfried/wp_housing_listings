@@ -18,11 +18,11 @@
 		"cardBackground": { "type": "string", "default": "#fff" },
 		"cardRadius": { "type": "number", "default": 40 },
 		"cardShadow": { "type": "string", "default": "0 2px 4px rgba(0,0,0,0.1)" },
-		"cardWidth": { "type": "number", "default": 300 },
+		"cardWidth": { "type": "number", "default": 900 },
 
 		"cardTitleFontSize": { "type": "number", "default": 24 },
 		"cardTitleFontWeight": { "type": "string", "default": "bold" },
-		"cardTitleFontStyle": { "type": "string", "default": "normal" },
+		"cardTitleFontStyle": { "type": "string", "default": "inherit" },
 		"cardTitlePadding": { "type": "number", "default": 10 },
 
 
