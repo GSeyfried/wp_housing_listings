@@ -164,6 +164,7 @@ function hrdc_register_housing_listing_cpt() {
         'labels'             => $labels,
         'public'             => true,
         'has_archive'        => true,
+        'publicly_queryable' => false,
         'show_in_rest'       => true,
         'supports'           => array( 'title', 'editor', 'thumbnail', 'custom-fields' ),
         'capability_type'    => 'post',

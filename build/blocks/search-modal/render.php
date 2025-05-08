@@ -126,15 +126,30 @@ $output .= '</button>';
 $output .= '</div>';
 
 // Modal overlay (hidden by default).
-$output .= '<div id="hrdc-modal-overlay" class="hrdc-search-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999;">';
+$output .= '<div id="hrdc-modal-overlay"
+	class="hrdc-search-modal-overlay"
+	style="
+		display:none;
+		position:fixed;inset:0;
+		background:rgba(0,0,0,.6);
+		z-index:9998;
+		display:none;align-items:flex-start;justify-content:center;
+		width:100%;height:100%;
+		overflow:hidden;              /* page can scroll on iOS */
+		padding:4vh 10px;
+	">';                 
 $output .= '<div class="hrdc-search-modal-content" style="
 	background:' . esc_attr( $backgroundColor ) . ';
 	border-radius:' . esc_attr( $borderRadius ) . 'px;
-	width:600px; max-width:90%;
+	width:600px;max-width:90%;
+	max-height:calc(100vh - 80px);           /* ❷ keeps it in the window */
+	overflow:auto;             /* ❷ gives the panel its own scroll bar */
 	margin:60px auto;
-	padding:30px;
+	padding:30px 24px 40px;
 	position:relative;
+	display:flex;flex-direction:column;gap:16px;
 ">';
+
 $output .= '<button id="hrdc-close-search-modal" style="
     position:absolute;
     top:8px;right:10px;

@@ -78,7 +78,6 @@ function translateCategory(raw) {
 	return key ? labels[key][ span ? 'es' : 'en' ] : raw;
 }
 
-
 function getLabels() {
     const a = window.hrdcBlockAttr || {};
     return a.isSpanish
@@ -232,13 +231,14 @@ function updateListings(list) {
 	list.forEach(post => {
 		const m      = post.meta || {};
 		const hasWeb = m._website && m._website.startsWith('http');
+		const cleanTitle = post.title.replace(/^\s*Private:\s*/i, '');
 
 		out.push(`
 		<div class="listing-box">
 			<div class="listing-row" style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
 				<!-- left column : title + meta -->
 				<div class="listing-left" style="flex:1 1 320px; min-width:260px;">
-					<div class="listing-title" style="${style.title}">${post.title}</div>
+					<div class="listing-title" style="${style.title}">${cleanTitle}</div>
 
 					<div class="listing-info" style="${style.info}">
 						<em style="${style.label}">${LBL.address}:</em>

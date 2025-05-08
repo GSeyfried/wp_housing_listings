@@ -1,33 +1,48 @@
-.hrdc-housing-listings {
-    display: grid;
-    gap: 20px;
-    /* Default columns; can be overridden inline via PHP */
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .hrdc-housing-listings .listing-box {
-    border: 1px solid #ccc;  /* default from cardBorder */
-    padding: 20px;           /* default cardInnerPadding */
-    margin: 20px;            /* default cardouterPadding */
-    width: 300px;            /* default cardWidth */
-    background-color: #fff;  /* default cardBackground */
-    border-radius: 40px;     /* default cardRadius */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);  /* default cardShadow */
-    font-family: inherit;    /* default; use cardFontFamily inline */
-  }
-  
-  .hrdc-housing-listings .listing-title {
-    font-size: 24px;         /* default cardtitleFontSize */
-    font-weight: bold;       /* default cardtitleFontWeight */
-    font-style: normal;      /* default cardtitleFontStyle */
-    color: #333333;          /* default cardtitleColor */
-    text-align: left;        /* default cardTitleTextAlign */
-    padding-bottom: 10px;     /* default cardtitlePadding */
-  }
-  
-  .hrdc-housing-listings .listing-info,
-  .hrdc-housing-listings .listing-link {
-    text-align: left;        /* default cardTextAlign */
-    /* You can add additional typography styles here using your label/value font settings */
-  }
-  
+/* ------------- GRID + CARD SHELL ------------- */
+.hrdc-housing-listings{
+	display:grid;            /* grid columns get injected by JS   */
+	gap:20px;
+}
+
+.hrdc-housing-listings .listing-box{
+	border:var(--hl-card-border,2px solid #ccc);
+	border-radius:var(--hl-card-radius,10px);
+	background:var(--hl-card-bg,#fff);
+	box-shadow:var(--hl-card-shadow,0 2px 4px rgba(0,0,0,.1));
+	padding:var(--hl-card-pad,20px);
+}
+
+/* ------------- TYPOGRAPHY -------------------- */
+.hrdc-housing-listings .listing-title{
+	font-family:var(--hl-title-font,inherit);
+	font-size:var(--hl-title-size,24px);
+	font-weight:var(--hl-title-weight,700);
+	color:var(--hl-title-color,#333);
+	margin:0 0 var(--hl-title-pad,10px) 0;
+}
+
+.hrdc-housing-listings .listing-info{
+	font-family:var(--hl-body-font,inherit);
+	font-size:var(--hl-body-size,16px);
+}
+
+.hrdc-housing-listings .listing-info em{
+	font-style:var(--hl-label-style,italic);
+	font-weight:var(--hl-label-weight,700);
+}
+
+/* ------------- LAYOUT WITH FLEX -------------- */
+.hrdc-housing-listings .listing-row{
+	display:flex;
+	gap:16px;
+	align-items:flex-start;
+}
+
+.hrdc-housing-listings .listing-left{flex:1 1 65%;}
+.hrdc-housing-listings .listing-right{flex:1 1 35%;}
+@media(max-width:900px){
+	.hrdc-housing-listings .listing-row{flex-direction:column;}
+	.hrdc-housing-listings .listing-left,
+	.hrdc-housing-listings .listing-right{flex:1 1 100%;}
+}
+

@@ -77,10 +77,12 @@ if ( $query->have_posts() ) {
             $desc_raw  = apply_filters( 'the_content', get_the_content() );
             $desc_html = wp_kses_post( $desc_raw );            // already HTML
         }
+        $raw_title  = get_the_title();
+        $clean_title = preg_replace( '/^\s*Private:\s*/i', '', $raw_title );
 
         $listings_data[] = array(
             'id'      => $post_id,
-            'title'   => get_the_title(),
+            'title'   => $clean_title,
             'content' => $desc_html,        // <— real HTML
             'meta'    => array(
                 '_address'                => get_post_meta( $post_id, '_address', true ) ?: '',
@@ -264,7 +266,7 @@ echo '<div ' . $wrapper_atts . '>';
             echo '<div class="listing-row" style="display:flex;gap:16px;align-items:flex-start;">';
                     echo '<div class="listing-left">';
                         // Title
-                        echo '<div class="listing-title" style="font-size:' . esc_attr( $cardTitleFontSize ) . 'px; color:' . esc_attr( $cardTitleColor ) . '; text-align:' . esc_attr( $cardTitleTextAlign ) . '; font-weight:' . esc_attr( $cardTitleFontWeight ) . '; font-style:' . esc_attr( $cardTitleFontStyle ) . '; padding-bottom:' . esc_attr( $cardTitlePadding ) . 'px;">' . get_the_title() . '</div>';
+                        echo '<div class="listing-title" style="font-size:' . esc_attr( $cardTitleFontSize ) . 'px; color:' . esc_attr( $cardTitleColor ) . '; text-align:' . esc_attr( $cardTitleTextAlign ) . '; font-weight:' . esc_attr( $cardTitleFontWeight ) . '; font-style:' . esc_attr( $cardTitleFontStyle ) . '; padding-bottom:' . esc_attr( $cardTitlePadding ) . 'px;">' . esc_html( $clean_title ) . '</div>';
                         // Address
                         echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
                             echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . esc_html( $lbl['addr'] ) . '</em> ';
