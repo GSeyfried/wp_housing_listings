@@ -14,56 +14,6 @@ $query = new WP_Query( array(
     'order'          => 'ASC',
 ) );
 
-// Build an array of listings data for use in JavaScript filtering with language support.
-$is_spanish = ( get_locale() === 'es_ES' );   // or after switch_to_locale()
-$listings_data = array();
-
-//translate categories: I was asked to change the categories multiple times so this should make it better with current descrpencies and ready it for future changes.
-if ( ! function_exists( 'hrdc_translate_category' ) ) {
-	function hrdc_translate_category( $raw_cat, $spanish = false ) {
-
-		// ── normalise the incoming value (case / extra spaces) ─────────
-		$cat = trim( strtolower( $raw_cat ) );
-
-		/* ---------- canonical look-ups ---------- */
-		$canon = [
-			// “affordable / lihtc” aliases
-			'low-income tax-credit eligible'        => 'affordable',
-			'low income tax credit eligible'        => 'affordable',
-			'income-restricted affordable rentals'  => 'affordable',
-
-			// subsidised
-			'income-restricted subsidized rentals'  => 'subsidized',
-
-			// market-rate / property mgmt
-			'property management and market rate apartments' => 'market',
-		];
-
-		$key = $canon[ $cat ] ?? null;        // null = unknown / passthrough
-
-		/* ---------- what we show to the end user ---------- */
-		$labels = [
-			'affordable' => [
-				'en' => 'Low-Income Tax-Credit Eligible',
-				'es' => 'Viviendas ASEQUIBLES con restricción de ingresos',
-			],
-			'subsidized' => [
-				'en' => 'Income-Restricted SUBSIDIZED Rentals',
-				'es' => 'Viviendas SUBSIDIADAS con restricción de ingresos',
-			],
-			'market' => [
-				'en' => 'Property Management and Market Rate Apartments',
-				'es' => 'Gestión de propiedades y apartamentos de precio de mercado',
-			],
-		];
-
-		return $key && isset( $labels[ $key ] )
-			? $labels[ $key ][ $spanish ? 'es' : 'en' ]
-			: $raw_cat;               // unknown → show as-is
-	}
-}
-
-
 if ( $query->have_posts() ) {
     while ( $query->have_posts() ) {
         $query->the_post();
@@ -98,6 +48,7 @@ if ( $query->have_posts() ) {
                 '_unit_types'             => get_post_meta( $post_id, '_unit_types', true ) ?: '',
                 '_pets_allowed'           => get_post_meta( $post_id, '_pets_allowed', true ) ?: '',
                 '_social_security_required' => get_post_meta( $post_id, '_social_security_required', true ) ?: '',
+                '_hrdc_property'            => get_post_meta( $post_id, '_universal_application', true ) ?: '',
 
             )
         );
@@ -133,55 +84,7 @@ $cardTextAlign       = isset( $attributes['cardTextAlign'] ) ? $attributes['card
 $cardValueFontWeight = isset( $attributes['cardValueFontWeight'] ) ? $attributes['cardValueFontWeight'] : 'normal';
 $cardValueFontStyle  = isset( $attributes['cardValueFontStyle'] ) ? $attributes['cardValueFontStyle'] : 'normal';
 $cardLabelFontWeight = isset( $attributes['cardLabelFontWeight'] ) ? $attributes['cardLabelFontWeight'] : 'bold';
-$cardLabelFontStyle  = isset( $attributes['cardLabelFontStyle'] ) ? $attributes['cardLabelFontStyle'] : 'italic';
-
-// Output custom styles.
-$custom_styles = '<style>
-.hrdc-housing-listings {
-    display: grid;
-    grid-template-columns: repeat(' . esc_attr( $cardColumns ) . ', ' . esc_attr( $cardWidth ) . 'px);
-    gap: 20px;
-    text-align: ' . esc_attr( $cardTextAlign ) . ';
-    font-family: ' . esc_attr( $cardFontFamily ) . ';
-}
-.hrdc-housing-listings .listing-box {
-    border: ' . esc_attr( $cardBorder ) . ';
-    width: 100% !important;
-    padding: ' . esc_attr( $cardInnerPadding ) . 'px;
-    margin: ' . esc_attr( $cardOuterPadding ) . 'px;
-    background-color: ' . esc_attr( $cardBackground ) . ';
-    border-radius: ' . esc_attr( $cardRadius ) . 'px;
-    box-shadow: ' . esc_attr( $cardShadow ) . ';
-}
-.hrdc-housing-listings .listing-title {
-    font-weight:700;
-    font-size: ' . esc_attr( $cardTitleFontSize ) . 'px;
-    color: ' . esc_attr( $cardTitleColor ) . ';
-    text-align: ' . esc_attr( $cardTitleTextAlign ) . ';
-    margin-bottom: ' . esc_attr( $cardTitlePadding ) . 'px;
-    margin-top: 10px;
-}
-.hrdc-housing-listings .listing-info,
-.hrdc-housing-listings .listing-link {
-    text-align: ' . esc_attr( $cardTextAlign ) . ';
-    font-weight: ' . esc_attr( $cardValueFontWeight ) . ';
-    font-style: ' . esc_attr( $cardValueFontStyle ) . ';
-}
-.hrdc-housing-listings .listing-row{
-	display:flex;
-	gap:16px;
-	align-items:flex-start;
-	flex-wrap:wrap;
-}
-.hrdc-housing-listings .listing-left{
-	flex:0 1 68%;          /* grow | shrink | basis  */
-	min-width:300px;
-}
-.hrdc-housing-listings .listing-right{
-	flex:0 1 30%;
-	min-width:200px;
-}
-</style>';
+$cardLabelFontStyle  = isset( $attributes['cardLabelFontStyle'] ) ? $attributes['cardLabelFontStyle'] : 'normal';
 
 /**
  * ------------------------------------------------------------------
@@ -234,86 +137,7 @@ echo '<div id="hl-results-count" style="margin-bottom:10px; font-size:16px; colo
 $wrapper_atts = get_block_wrapper_attributes( array( 'class' => 'hrdc-housing-listings ' . esc_attr( $container_class ) ) );
 echo '<div ' . $wrapper_atts . '>';
     echo '<div id="hl-results">';
-    
-    if ( $query->have_posts() ) {
-        while ( $query->have_posts() ) {
-            $query->the_post();
-            $post_id = get_the_ID();
-
-            // Retrieve meta values.
-            $address  = get_post_meta( $post_id, '_address', true );
-            $city     = get_post_meta( $post_id, '_city', true );
-            $manager  = get_post_meta( $post_id, '_property_manager', true );
-            $phone    = get_post_meta( $post_id, '_phone', true );
-            $website  = get_post_meta( $post_id, '_website', true );
-            $category = get_post_meta( $post_id, '_category', true );
-
-            // Use fallback values if any are empty.
-            $address  = ! empty( $address ) ? esc_html( $address ) : 'N/A';
-            $city     = ! empty( $city ) ? esc_html( $city ) : '';
-            $manager  = ! empty( $manager ) ? esc_html( $manager ) : 'N/A';
-            $phone    = ! empty( $phone ) ? esc_html( $phone ) : 'N/A';
-            $category_raw = ! empty( $category ) ? esc_html( $category ) : 'N/A';
-            $category = hrdc_translate_category( $category_raw, $is_spanish ); //Translate category
-
-            //do not hyperlink NA websites
-            $has_url = ! empty( $website ) && stripos( $website, 'http' ) === 0;
-            $website_url  = $has_url ? esc_url( $website ) : '';
-            $website_text = $has_url ? esc_html( $website ) : __( 'N/A', 'hrdc-custom-tools' );
-
-            // Build each listing's HTML.
-            echo '<div class="listing-box">';
-            echo '<div class="listing-row" style="display:flex;gap:16px;align-items:flex-start;">';
-                    echo '<div class="listing-left">';
-                        // Title
-                        echo '<div class="listing-title" style="font-size:' . esc_attr( $cardTitleFontSize ) . 'px; color:' . esc_attr( $cardTitleColor ) . '; text-align:' . esc_attr( $cardTitleTextAlign ) . '; font-weight:' . esc_attr( $cardTitleFontWeight ) . '; font-style:' . esc_attr( $cardTitleFontStyle ) . '; padding-bottom:' . esc_attr( $cardTitlePadding ) . 'px;">' . esc_html( $clean_title ) . '</div>';
-                        // Address
-                        echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . esc_html( $lbl['addr'] ) . '</em> ';
-                            echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $address . ', ' . $city . '</span>';
-                        echo '</div>';
-                        // Manager
-                        echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' .esc_html( $lbl['man'] ) . '</em> ';
-                            echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $manager . '</span>';
-                        echo '</div>';
-                        // Phone
-                        echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' .esc_html( $lbl['phone'] ) . '</em> ';
-                            echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $phone . '</span>';
-                        echo '</div>';
-                        // Website
-                        echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo     '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' . esc_html( $lbl['web'] ) . '</em> ';
-                            echo     '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' .
-                                        ( $has_url
-                                            ? '<a href="' . $website_url . '" target="_blank" rel="noreferrer">' . $website_text . '</a>'
-                                            : esc_html( $website_text )
-                                        ) .
-                                    '</span>';
-                            echo '</div>';
-                        // Category
-                        echo '<div class="listing-info" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' .esc_html( $lbl['cat'] ) . '</em> ';
-                            echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $category . '</span>';
-                        echo '</div>';
-                    echo '</div>'; // end listing-left
-
-                    echo '<div class="listing-right" style="font-family:' . esc_attr( $cardFontFamily ) . '; text-align:' . esc_attr( $cardTextAlign ) . ';">';
-                        // Description
-                        echo '<div class="listing-info">';
-                            echo '<em style="font-weight:' . esc_attr( $cardLabelFontWeight ) . '; font-style:' . esc_attr( $cardLabelFontStyle ) . ';">' .esc_html( $lbl['desc'] )  . '</em><br>';
-                            echo '<span style="font-weight:' . esc_attr( $cardValueFontWeight ) . '; font-style:' . esc_attr( $cardValueFontStyle ) . ';">' . $desc_html . '</span>';
-                        echo '</div>';
-                    echo '</div>'; // end listing-right
-                echo '</div>'; // end listing-row
-            echo '</div>'; // end listing-box
-        }
-        wp_reset_postdata();
-    } else {
-        echo '<p><strong>No listings found.</strong></p>';
-    }
-    echo '</div>'; // end hl-results container
+    echo '</div>'; 
 
 // ------------------------------------------------------------------
 // Filtering & Event Listening Logic:
