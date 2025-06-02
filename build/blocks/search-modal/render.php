@@ -109,7 +109,7 @@ $output .= '<div ' . $wrapper_atts . ' style="' . esc_attr( $container_style ) .
 
 // Trigger button.
 $output .= '<div class="search-modal-front-trigger" style="text-align:' . esc_attr( $align ) . '; margin-bottom:10px;">';
-$output .= '<button id="hrdc-open-search-modal" class="btn" style="
+$output .= '<button type="button" id="hrdc-open-search-modal" class="btn" style="
 	background-color:' . esc_attr( $buttonColor ) . ';
 	border:1px solid ' . esc_attr( $borderColor ) . ';
 	border-radius:' . esc_attr( $borderRadius ) . 'px;
@@ -125,6 +125,7 @@ $output .= esc_html( $buttonText );
 $output .= '</button>';
 $output .= '</div>';
 
+$output .= '<style>body.modal-open {overflow: hidden;}</style>';
 // Modal overlay (hidden by default).
 $output .= '<div id="hrdc-modal-overlay"
 	class="hrdc-search-modal-overlay"
@@ -135,7 +136,7 @@ $output .= '<div id="hrdc-modal-overlay"
 		z-index:9998;
 		display:none;align-items:flex-start;justify-content:center;
 		width:100%;height:100%;
-		overflow:hidden;              /* page can scroll on iOS */
+		overflow-y:auto;overflow-x: hidden;
 		padding:4vh 10px;
 	">';                 
 $output .= '<div class="hrdc-search-modal-content" style="
@@ -143,18 +144,118 @@ $output .= '<div class="hrdc-search-modal-content" style="
 	border-radius:' . esc_attr( $borderRadius ) . 'px;
 	width:600px;max-width:90%;
 	max-height:calc(100vh - 80px);           /* ❷ keeps it in the window */
-	overflow:auto;             /* ❷ gives the panel its own scroll bar */
+	overflow-y:auto; 
+	overflow-x:visible;   
 	margin:60px auto;
-	padding:30px 24px 40px;
+	padding:30px 24px 60px;
 	position:relative;
 	display:flex;flex-direction:column;gap:16px;
 ">';
+if ( ! did_action( 'hrdc_search_modal_css' ) ) {
+    do_action( 'hrdc_search_modal_css' );
+	$output .= '<style>
+		/* wrapper for every multiselect */
+		.hrdc-choices{
+			width:90%;
+			margin:0 auto;          /* centre */
+			position:relative;      /* anchor dropdown */
+		}
+		/* field body */
+		.hrdc-choices .choices__inner{
+			min-height:38px;
+			padding:6px 8px;
+			border:1px solid #ccc;
+			border-radius:4px;
+			cursor:pointer;
+			position: relative;
+		}
+		/* ⌄ caret icon */
+		.hrdc-choices[data-type*=select-multiple] .choices__inner:after{
+			content:"⌄";font-size:18px;color:#555;
+			position:absolute;
+			right:8px;top:50%;
+			transform:translateY(-50%);
+			pointer-events:none;
+		}
+		.hrdc-choices.is-open .choices__inner:after{
+			transform:translateY(-50%) rotate(180deg);
+		}
 
-$output .= '<button id="hrdc-close-search-modal" style="
+		.hrdc-choices[data-type=select-one] .choices__inner{
+			padding:10px 38px 10px 8px;
+		}
+		.hrdc-choices[data-type*=select-multiple] .choices__item--selectable{
+			display:flex;
+			align-items:center;
+			justify-content:center;   /* label centred */
+			padding:4px 20px;
+			position:relative;        /* anchor delete overlay */
+			background:#147278;
+			color:#fff;
+			border-radius:12px;
+			margin:2px 4px 2px 0;
+			font-size:13px;
+		}
+
+		/* stretch the little × so any click deletes */
+		.hrdc-choices .choices__button{
+			position:absolute;
+			inset:0;                  /* fills entire chip */
+			opacity:0;                /* invisible but clickable */
+			cursor:pointer;
+		}
+
+		/* hide stray (old) input */
+		.hrdc-choices .choices__input{
+			display:none;
+		}
+
+		.hrdc-choices .choices__button{
+			margin-left:4px;border:none;
+			cursor:pointer;line-height:1;
+		}
+
+		/* dropdown panel */
+		.hrdc-choices .choices__list--dropdown {
+			position: absolute;
+			top: 100%;
+			left: 0;
+			width: 100%;
+			max-height: 180px;
+			overflow-y: auto;
+			background: #fff;
+			border: 1px solid #ccc;
+			border-top: none;
+			border-radius: 0 0 4px 4px;
+			z-index: 10000;
+			padding-bottom: 10px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+			box-sizing: border-box;
+		}
+		
+		/* hover color (darker blue) */
+		.hrdc-choices .choices__item--choice.is-highlighted {
+			background-color:rgb(19, 73, 80) !important;
+			color: #fff !important;
+		}
+		.hrdc-choices .choices__inner:focus-visible {
+			outline: 2px solid #0b7;
+			outline-offset: 2px;
+		}
+		.hrdc-choices .choices__list--dropdown::-webkit-scrollbar-track {
+			background: transparent;
+		}
+		.hrdc-choices .choices__item--selectable:hover {
+			filter: brightness(1.15);
+		}
+		</style>';
+}
+
+$output .= '<button type="button" id="hrdc-close-search-modal" style="
     position:absolute;
     top:8px;right:10px;
     width:32px;height:32px;                /* square box */
-    border:2px solidrgb(224, 83, 70);              /* red outline */
+    border:2px solid rgb(224, 83, 70);              /* red outline */
     background:#c21807;                    /* red fill   */
     color:#fff;                            /* always visible  */
     font-size:20px;line-height:28px;       /* centre the ×   */
@@ -195,12 +296,12 @@ if ( $cityShow ) {
 if ( $demographicShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
 	$output .= '<label for="hrdc-demographic" style="' . $labelStyle . '">' . $lbl['demo'] . '</label><br/>';
-	$output .= '<select id="hrdc-demographic" style="width:90%">';
+	$output .= '<select id="hrdc-demographic" multiple style="width:90%">';
     $output .= '<option value="">' . __( '', 'hrdc-custom-tools' ) . '</option>';
 	$output .= '<option value="None of the above">' . $lbl['noneAbove'] . '</option>';
     $output .= '<option value="senior (55+)">' . $lbl['sen55'] . '</option>';
     $output .= '<option value="senior (62+)">' . $lbl['sen62']. '</option>';
-    $output .= '<option value="person with disabling condition">' . $lbl['disabled'] . '<option>';
+    $output .= '<option value="person with disabling condition">' . $lbl['disabled'] . '</option>';
 	$output .= '</select>';
 	$output .= '</div>';
 }
@@ -284,7 +385,7 @@ if ( $categoryShow ) {
 
 // Buttons: Apply & Reset.
 $output .= '<div style="margin-top:20px; text-align:center;">';
-$output .= '<button class="btn" id="hrdc-apply-search" style="
+$output .= '<button class="btn" type="button" id="hrdc-apply-search" style="
 	background-color:#0073aa;
 	color:#fff;
 	border:none;
@@ -293,7 +394,7 @@ $output .= '<button class="btn" id="hrdc-apply-search" style="
 	cursor:pointer;
 	margin-right:10px;
 ">' . $lbl['btnApply']. '</button>';
-$output .= '<button class="btn" id="hrdc-reset-search" style="
+$output .= '<button class="btn" type="button" id="hrdc-reset-search" style="
 	background-color:#fff;
 	color:#0073aa;
 	border:1px solid #0073aa;

@@ -1,11 +1,22 @@
 function getMultiValue(id) {
-	const el = document.getElementById(id);
-	return el ? Array.from(el.selectedOptions).map(o => o.value) : [];
+  const el = document.getElementById(id);
+  if (!el) return [];
+  // Choices gives us a helper
+  if (el.choices) return el.choices.getValue(true);  // raw values
+  return Array.from(el.selectedOptions).map(o => o.value);
 }
 
-function clearMulti(id) {
-	const el = document.getElementById(id);
-	if (el) Array.from(el.options).forEach(o => (o.selected = false));
+function clearMulti(id){
+  	const el = document.getElementById(id);
+  	if (!el) return;
+
+	if (el.choices){
+	el.choices.removeActiveItems();
+	if (!el.multiple){
+		el.choices.setChoiceByValue('');
+		el.choices.showPlaceholder(true);   // 👈 new line
+ 	 }
+	}
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,9 +26,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const applyBtn  = document.getElementById('hrdc-apply-search');
     const resetBtn  = document.getElementById('hrdc-reset-search');
 
+	document.querySelectorAll('#hrdc-modal-overlay select').forEach(sel => {
+        const c = new Choices(sel, {
+            removeItemButton : sel.multiple,   // chips get × only on multi-selects
+            searchEnabled    : false,  // no type-ahead field
+            shouldSort       : false,  // keep original order
+            itemSelectText   : '',     // hide tooltip
+            classNames       : { containerOuter: 'hrdc-choices' }
+        });
+        sel.choices = c;              // expose instance for getMultiValue / clearMulti
+		sel.style.display = 'none';
+    });
+
 	/* ——— open / close ——— */
-	openBtn?.addEventListener('click', () => (overlay.style.display = 'block'));
-	closeBtn?.addEventListener('click', () => (overlay.style.display = 'none'));
+	openBtn?.addEventListener('click', () => {document.body.classList.add('modal-open');overlay.style.display = 'block'});
+	closeBtn?.addEventListener('click', () => {document.body.classList.remove('modal-open');overlay.style.display = 'none'});
 
 	/* ——— APPLY ——— */
 	applyBtn?.addEventListener('click', () => {
@@ -37,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			new CustomEvent('hrdcApplyFilters', { detail: filters })
 		);
 		overlay.style.display = 'none';
+		document.body.classList.remove('modal-open');
 	});
 
 	/* ——— RESET ——— */
@@ -60,5 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			new CustomEvent('hrdcApplyFilters', { detail: defaultFilters })
 		);
 		overlay.style.display = 'none';
+		document.body.classList.remove('modal-open');
 	});
 });

@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       HRDC Custom Tools
  * Description:       Multi-block plugin with housing listings and search modal.
- * Version:           0.1.2
+ * Version:           0.1.3
  * Requires at least: 6.7
  * Requires PHP:      7.4
  * Author:            Compliance @ HRDC (Griffin)
@@ -99,14 +99,18 @@ add_action( 'init', 'hrdc_register_blocks' );
 add_filter( 'block_categories_all', 'hrdc_register_custom_category', 10, 2 );
 
 function hrdc_register_blocks() {
-    $custom_blocks = array(
-        'housing-listings',
-        'search-modal',
-    );
-    
-    foreach ( $custom_blocks as $block ) {
-        register_block_type( __DIR__ . '/build/blocks/' . $block );
-    }
+	$blocks = [ 'housing-listings', 'search-modal' ];
+
+	foreach ( $blocks as $slug ) {
+		$block_path   = __DIR__ . '/build/blocks/' . $slug;
+		$block_type   = register_block_type( $block_path );   // returns WP_Block_Type
+		$view_handle  = $block_type->view_script_handles[0] ?? ''; // first view script
+
+		if ( $slug === 'search-modal' && $view_handle ) {
+			// append our CDN handle without touching the asset file
+			wp_script_add_data( $view_handle, 'dependencies', [ 'choices-js' ] );
+		}
+	}
 }
 
 function hrdc_register_custom_category( $categories ) {
@@ -117,6 +121,27 @@ function hrdc_register_custom_category( $categories ) {
         ),
     ) );
 }
+
+/* =======================================================================
+             Add Choices.js for Select Inputs on Search Modal
+======================================================================== */
+function hrdc_enqueue_choices() {
+	wp_enqueue_style(
+		'choices-css',
+		'https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css',
+		[],
+		'10.3.2'    // pin a version you like
+	);
+
+	wp_enqueue_script(
+		'choices-js',
+		'https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js',
+		[],
+		'10.3.2',
+		true        // load in footer
+	);
+}
+add_action( 'wp_enqueue_scripts', 'hrdc_enqueue_choices' );
 
 /* =======================================================================
     Register Custom Post Type for Housing Listings & Meta Registration
