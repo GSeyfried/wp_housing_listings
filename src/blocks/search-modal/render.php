@@ -178,11 +178,11 @@ $output .= '<div class="modal-fields-front-preview" style="
 if ( $cityShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
 	$output .= '<label for="hrdc-city" style="' . $labelStyle . '">' . esc_html( $lbl['city'] ). '</label><br/>';
-	$output .= '<select id="hrdc-city" multiple size="6" style="width:90%">';
+	$output .= '<select id="hrdc-city" multiple style="width:90%">';
 	$output .= '<option value="">' . esc_html( $lbl['any'] ) . '</option>';
 	$output .= '<option value="bozeman">Bozeman</option>';
 	$output .= '<option value="belgrade">Belgrade</option>';
-	$output .= '<option value="belgrade">Big Sky</option>';
+	$output .= '<option value="big sky">Big Sky</option>';
 	$output .= '<option value="west yellowstone">West Yellowstone</option>';
 	$output .= '<option value="livingston">Livingston</option>';
 	$output .= '<option value="clyde park">Clyde Park</option>';
@@ -195,7 +195,7 @@ if ( $cityShow ) {
 if ( $demographicShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
 	$output .= '<label for="hrdc-demographic" style="' . $labelStyle . '">' . $lbl['demo'] . '</label><br/>';
-	$output .= '<select id="hrdc-demographic" multiple size="3" style="width:90%">';
+	$output .= '<select id="hrdc-demographic" style="width:90%">';
     $output .= '<option value="">' . __( '', 'hrdc-custom-tools' ) . '</option>';
 	$output .= '<option value="None of the above">' . $lbl['noneAbove'] . '</option>';
     $output .= '<option value="senior (55+)">' . $lbl['sen55'] . '</option>';
@@ -233,7 +233,7 @@ if ( $creditCheckShow ) {
 if ( $unitTypesShow ) {
     $output .= '<div class="modal-field" style="margin-bottom:10px;">';
     $output .= '<label for="hrdc-unit-types" style="' . $labelStyle . '">' . __( 'Unit Types', 'hrdc-custom-tools' ) . '</label><br/>';
-    $output .= '<select id="hrdc-unit-types" multiple size="6" style="width:90%">';
+    $output .= '<select id="hrdc-unit-types" multiple style="width:90%">';
     $output .= '<option value="">' . $lbl['any'] . '</option>';
     $output .= '<option value="studio">' .$lbl['studio'] . '</option>';
     $output .= '<option value="1-bedroom">' . $lbl['1bed'] . '</option>';
@@ -272,7 +272,7 @@ if ( $socialSecurityShow ) {
 if ( $categoryShow ) {
 	$output .= '<div class="modal-field" style="margin-bottom:10px;">';
 	$output .= '<label for="hrdc-housing-types" style="' . $labelStyle . '">' . $lbl['housing'] . '</label><br/>';
-	$output .= '<select id="hrdc-housing-types" multiple size="3" style="width:90%">';
+	$output .= '<select id="hrdc-housing-types" multiple style="width:90%">';
     $output .= '<option value="">' . __( '', 'hrdc-custom-tools' ) . '</option>';
 	$output .= '<option value="">' . $lbl['any'] . '</option>';
 	$output .= '<option value="low income tax credit">' . $lbl['lowIncome'] . '</option>';

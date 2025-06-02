@@ -96,8 +96,18 @@ function advancedFilterListings(listings, filters) {
 		return input.toString().toLowerCase() === 'yes';
 	}
 
+  // helper: works with strings *or* arrays
+  	const matchString = (value, filterArrOrStr) => {
+    if (!filterArrOrStr || filterArrOrStr.length === 0) return true;    // no filter
+    	if (Array.isArray(filterArrOrStr)) {
+       		return filterArrOrStr.some(f => value.includes(String(f).toLowerCase()));
+     	}
+     	return value.includes(String(filterArrOrStr).toLowerCase());
+	};
+
 	// Compare demographic (reservedFor) values.
 	function funReservedForMatch(preferred, allowed) {
+		if (Array.isArray(preferred)) preferred = preferred.join(',');
 		function splitValues(input) {
 			if (!input) return [];
 			return input.toLowerCase()
@@ -138,6 +148,7 @@ function advancedFilterListings(listings, filters) {
 
 	// Compare unit types.
 	function funUnitTypesMatch(preferred /* array|string */, allowed) {
+		if (Array.isArray(preferred)) preferred = preferred.join(',');
 		function splitAndCleanUnits(input) {
 			return input
 				? input.toLowerCase().replace(/bedroom(s)?/gi, "").split(",")
@@ -159,6 +170,7 @@ function advancedFilterListings(listings, filters) {
 
 	// Compare housing types.
 	function funCategoryMatch(preferred, allowed) {
+		if (Array.isArray(preferred)) preferred = preferred.join(',');
 		if (!preferred || preferred.toLowerCase() === "any") return true;
 		function normalizeCategory(str) {
 			let lower = str.toLowerCase();
@@ -192,15 +204,15 @@ function advancedFilterListings(listings, filters) {
 		const socialSec    = meta._social_security_required ? meta._social_security_required.toLowerCase() : '';
 
 		// Match against filters.
-		const cityMatch         = !filters.city || filters.city.toLowerCase() === '' || city.includes(filters.city.toLowerCase());
-		const reservedForMatch  = !filters.reservedFor ||filters.reservedFor.toLowerCase() === '' || funReservedForMatch(filters.reservedFor, reservedFor);
+		const cityMatch         = matchString(city,filters.city);
+		const reservedForMatch  = funReservedForMatch(filters.reservedFor, reservedFor);
 		const appFeeMatch       = true;
 		const feloniesMatch     = !filters.felonies || filters.felonies.toLowerCase() === ''|| (normalizeYesNo(filters.felonies) === true ? felonies === 'yes' : true);
 		const creditCheckMatch  = !filters.creditCheck || filters.creditCheck.toLowerCase() === ''||(normalizeYesNo(filters.creditCheck) === false ? creditCheck === 'no' : true);
-		const unitTypesMatch    = !filters.unitTypes || filters.unitTypes.toLowerCase() === '' || funUnitTypesMatch(filters.unitTypes, unitTypes);
+		const unitTypesMatch    = funUnitTypesMatch(filters.unitTypes, unitTypes);
 		const petsAllowedMatch  = !filters.pets ||filters.pets.toLowerCase() === ''|| (normalizeYesNo(filters.pets) === true ? petsAllowed !== 'no' : true);
 		const socialSecMatch    = !filters.socialSecurity || filters.socialSecurity.toLowerCase() === ''|| (normalizeYesNo(filters.socialSecurity) === false ? socialSec === 'no' : true);
-		const categoryMatch     = !filters.category || filters.category.toLowerCase() === ''|| funCategoryMatch(filters.category, category);
+		const categoryMatch     = funCategoryMatch(filters.category, category);
 
 		/*
 		console.log("City:", city, "Filter:", filters.city, "Match:", cityMatch);
