@@ -260,7 +260,8 @@ echo '<div ' . $wrapper_atts . '>';
             $has_url = ! empty( $website ) && stripos( $website, 'http' ) === 0;
             $website_url  = $has_url ? esc_url( $website ) : '';
             $website_text = $has_url ? esc_html( $website ) : __( 'N/A', 'hrdc-custom-tools' );
-
+            $clean_title = preg_replace( '/^\s*Private:\s*/i', '', get_the_title() );
+            
             // Build each listing's HTML.
             echo '<div class="listing-box">';
             echo '<div class="listing-row" style="display:flex;gap:16px;align-items:flex-start;">';

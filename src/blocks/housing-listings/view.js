@@ -137,7 +137,7 @@ function advancedFilterListings(listings, filters) {
 		}
 
 	// Compare unit types.
-	function funUnitTypesMatch(preferred, allowed) {
+	function funUnitTypesMatch(preferred /* array|string */, allowed) {
 		function splitAndCleanUnits(input) {
 			return input
 				? input.toLowerCase().replace(/bedroom(s)?/gi, "").split(",")

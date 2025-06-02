@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       HRDC Custom Tools
  * Description:       Multi-block plugin with housing listings and search modal.
- * Version:           0.1.0
+ * Version:           0.1.2
  * Requires at least: 6.7
  * Requires PHP:      7.4
  * Author:            Compliance @ HRDC (Griffin)
@@ -17,6 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once plugin_dir_path( __FILE__ ) . 'admin-menu.php';
 require_once plugin_dir_path( __FILE__ ) . 'shortcodes.php';
+
+/* =======================================================================
+ *  Robots: never let Google index single CPT pages
+ * =====================================================================*/
+add_action( 'wp_head', function () {
+    if ( is_singular( 'housing_listing' ) ) {          // safer
+        echo '<meta name="robots" content="noindex,follow">' . PHP_EOL;
+    }
+}, 5);
 
 /* =======================================================================
    Utility Logging Function
@@ -163,8 +172,9 @@ function hrdc_register_housing_listing_cpt() {
     $args = array(
         'labels'             => $labels,
         'public'             => true,
-        'has_archive'        => true,
+        'has_archive'        => false,
         'publicly_queryable' => false,
+        'rewrite'            => false,
         'show_in_rest'       => true,
         'supports'           => array( 'title', 'editor', 'thumbnail', 'custom-fields' ),
         'capability_type'    => 'post',

@@ -296,6 +296,7 @@ export default function SearchModalBlockEdit( { attributes, setAttributes } ) {
 								{ label: L('any'), value: '' },
 								{ label: 'Bozeman', value: 'bozeman' },
 								{ label: 'Belgrade', value: 'belgrade' },
+								{ label: 'Big Sky', value: 'big sky' },
 								{ label: 'West Yellowstone', value: 'west yellowstone' },
 								{ label: 'Livingston', value: 'livingston' },
 								{ label: 'Clyde Park', value: 'clyde park' },
